@@ -1,0 +1,14 @@
+# ApexCode-7B Ollama Modelfile
+# High-Speed Variant for Ultra-Low-Latency Tab Autocompletion & 64k Context
+
+FROM qwen2.5-coder:7b-instruct-q8_0
+
+PARAMETER num_ctx 65536
+PARAMETER num_gpu 99
+PARAMETER temperature 0.1
+PARAMETER top_p 0.95
+PARAMETER repeat_penalty 1.05
+PARAMETER stop "<|im_end|>"
+PARAMETER stop "<|endoftext|>"
+
+SYSTEM """You are ApexCode-7B, an ultra-fast, precision coding assistant. Output minimal, accurate, and bug-free code without conversational filler."""

@@ -1,0 +1,11 @@
+# MLX-LM Configuration for Apple Silicon (M-Series Mac)
+model: "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit"
+draft_model: "mlx-community/Qwen2.5-Coder-0.5B-Instruct-4bit"
+temperature: 0.2
+top_p: 0.95
+max_tokens: 4096
+trust_remote_code: true
+prompt_cache: true
+num_draft_tokens: 5
+port: 8080
+host: "127.0.0.1"

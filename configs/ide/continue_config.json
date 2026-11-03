@@ -1,0 +1,35 @@
+{
+  "models": [
+    {
+      "title": "ApexCode-14B Speculative (Local)",
+      "provider": "openai",
+      "model": "qwen2.5-coder-14b-instruct",
+      "apiBase": "http://127.0.0.1:8080/v1",
+      "apiKey": "none",
+      "contextLength": 32768,
+      "completionOptions": {
+        "temperature": 0.2,
+        "topP": 0.95
+      }
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "ApexCode-FIM Autocomplete",
+    "provider": "openai",
+    "model": "qwen2.5-coder-14b-instruct",
+    "apiBase": "http://127.0.0.1:8080/v1",
+    "apiKey": "none"
+  },
+  "customCommands": [
+    {
+      "name": "refactor",
+      "prompt": "Refactor the selected code for optimal performance, clean architecture, and type safety. Provide surgical changes without conversational fluff.",
+      "description": "Refactor selected code"
+    },
+    {
+      "name": "test",
+      "prompt": "Generate comprehensive unit tests for the selected code covering edge cases and boundary failures.",
+      "description": "Generate Unit Tests"
+    }
+  ]
+}

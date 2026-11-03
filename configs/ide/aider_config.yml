@@ -1,0 +1,9 @@
+# Aider configuration for ApexCode-36GB
+openai-api-base: http://127.0.0.1:8080/v1
+openai-api-key: none
+model: openai/qwen2.5-coder-14b-instruct
+edit-format: diff
+stream: true
+cache-prompts: true
+map-tokens: 2048
+dark-mode: true
