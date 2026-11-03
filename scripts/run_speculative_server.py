@@ -78,6 +78,7 @@ def launch_server(
         "--cache-type-k", "q8_0",
         "--cache-type-v", "q8_0",
         "--n-gpu-layers", "99",
+        "--n-gpu-layers-draft", "99",
         "--flash-attn",
         "--alias", "qwen2.5-coder-14b-instruct",
         "--host", host,
