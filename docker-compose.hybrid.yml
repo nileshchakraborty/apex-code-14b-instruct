@@ -1,0 +1,63 @@
+version: '3.8'
+
+# Hybrid macOS Option B Compose Setup
+# The LLM server runs natively on macOS Metal GPU for 55+ tok/s throughput,
+# while all evaluation, dataset pipelines, and benchmarking run sandboxed in Docker.
+
+services:
+  # Isolated Benchmarking Tool
+  hybrid-bench:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apex-code-36gb:latest
+    container_name: apex-hybrid-bench
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: ["python3", "scripts/benchmark_throughput.py"]
+    command: ["--url", "http://host.docker.internal:8080", "--tokens", "384"]
+    volumes:
+      - ./logs:/app/logs:rw
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4.0'
+
+  # Isolated Dataset & Pipeline Sandbox
+  dataset-tool:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apex-code-36gb:latest
+    container_name: apex-dataset-tool
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: ["python3", "training/prepare_code_datasets.py"]
+    volumes:
+      - ./datasets:/app/datasets:rw
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+          cpus: '6.0'
+
+  # Interactive Sandboxed Shell
+  sandbox-shell:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apex-code-36gb:latest
+    container_name: apex-sandbox-shell
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stdin_open: true
+    tty: true
+    entrypoint: ["/bin/bash"]
+    volumes:
+      - .:/app
+    deploy:
+      resources:
+        limits:
+          memory: 10G
+          cpus: '8.0'

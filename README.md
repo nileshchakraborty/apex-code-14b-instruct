@@ -82,11 +82,15 @@ This fetches:
 - `qwen2.5-coder-14b-instruct-q5_k_m.gguf` (Primary model)
 - `qwen2.5-coder-0.5b-instruct-q8_0.gguf` (Draft model)
 
-### 3. Launch Speculative Inference Server (Metal / CUDA)
+### 3. Launch Speculative Inference Server (Option B - Flagship Mac Setup)
 ```bash
-python3 scripts/run_speculative_server.py --port 8080
+# Terminal 1: Launch native Apple Metal GPU server (55+ tokens/sec)
+bash scripts/start_host_metal_server.sh
+
+# Terminal 2: Run isolated tooling, benchmarks, and data pipelines in Docker
+docker-compose -f docker-compose.hybrid.yml run --rm hybrid-bench
 ```
-*Server is live at `http://127.0.0.1:8080/v1` with an OpenAI-compatible interface.*
+*See [docs/hybrid_mac_setup.md](docs/hybrid_mac_setup.md) for complete details on the Option B architecture.*
 
 ### 4. Alternative: 1-Click Ollama Setup
 If you prefer running via [Ollama](https://ollama.com):
