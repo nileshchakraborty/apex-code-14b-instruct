@@ -5,7 +5,7 @@ version: '3.8'
 # while all evaluation, dataset pipelines, and benchmarking run sandboxed in Docker.
 
 services:
-  # Isolated Benchmarking Tool
+  # Isolated Benchmarking Tool (llama-server default)
   hybrid-bench:
     build:
       context: .
@@ -16,6 +16,25 @@ services:
       - "host.docker.internal:host-gateway"
     entrypoint: ["python3", "scripts/benchmark_throughput.py"]
     command: ["--url", "http://host.docker.internal:8080", "--tokens", "384"]
+    volumes:
+      - ./logs:/app/logs:rw
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: '4.0'
+
+  # Isolated Benchmarking Tool targeting host Ollama (port 11434)
+  ollama-bench:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apex-code-36gb:latest
+    container_name: apex-ollama-bench
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    entrypoint: ["python3", "scripts/benchmark_throughput.py"]
+    command: ["--url", "http://host.docker.internal:11434", "--model", "apex-coder-14b", "--tokens", "384"]
     volumes:
       - ./logs:/app/logs:rw
     deploy:

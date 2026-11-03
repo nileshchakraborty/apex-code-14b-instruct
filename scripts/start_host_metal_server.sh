@@ -25,16 +25,25 @@ CHIP_NAME="$(sysctl -n machdep.cpu.brand_string 2>/dev/null || echo 'Apple Silic
 TOTAL_RAM_GB=$(($(sysctl -n hw.memsize) / 1024 / 1024 / 1024))
 echo "💻 Hardware: $CHIP_NAME | Unified RAM: ${TOTAL_RAM_GB} GB"
 
-# Check for llama-server or ollama
-if command -v llama-server &> /dev/null; then
+# Check if Ollama is currently active or preferred
+OLLAMA_ACTIVE=false
+if curl -s http://127.0.0.1:11434/api/version &> /dev/null; then
+    OLLAMA_ACTIVE=true
+fi
+
+# Determine server engine
+if [[ "${ENGINE:-auto}" == "ollama" ]] || { [[ "${ENGINE:-auto}" == "auto" ]] && [[ "$OLLAMA_ACTIVE" == "true" ]]; }; then
+    SERVER_BIN="ollama"
+    echo "✅ Detected active Ollama engine (llama.cpp Metal backend)."
+elif command -v llama-server &> /dev/null; then
     SERVER_BIN="llama-server"
     echo "✅ Found native llama-server with Metal acceleration."
 elif command -v ollama &> /dev/null; then
     SERVER_BIN="ollama"
-    echo "ℹ️ llama-server not found, but Ollama is available."
+    echo "ℹ️ Using Ollama with native Metal acceleration."
 else
     echo "❌ Neither 'llama-server' nor 'ollama' found."
-    echo "💡 Recommended: Install llama.cpp via Homebrew for Metal GPU acceleration:"
+    echo "💡 Recommended: Install llama.cpp via Homebrew or install Ollama:"
     echo "   brew install llama.cpp"
     exit 1
 fi
@@ -70,20 +79,27 @@ if [[ "$SERVER_BIN" == "llama-server" ]]; then
       --port "$PORT"
 
 elif [[ "$SERVER_BIN" == "ollama" ]]; then
-    echo "🚀 Starting Ollama with native Metal acceleration..."
+    echo "🚀 Configuring Ollama with native Metal + llama.cpp acceleration..."
     # Ensure Ollama daemon is active
     if ! curl -s http://127.0.0.1:11434/api/tags &> /dev/null; then
-        echo "Starting Ollama serve in background..."
+        echo "Starting Ollama daemon in background..."
         ollama serve &
-        sleep 3
+        sleep 2
     fi
 
     MODEL_TAG="apex-coder-14b"
     if ! ollama list | grep -q "$MODEL_TAG"; then
-        echo "Creating Ollama model '$MODEL_TAG' from configs/ollama/Modelfile.apex-coder-14b..."
+        echo "📥 Initializing '$MODEL_TAG' from configs/ollama/Modelfile.apex-coder-14b..."
         ollama create "$MODEL_TAG" -f configs/ollama/Modelfile.apex-coder-14b
+    else
+        echo "✅ Model '$MODEL_TAG' is ready in Ollama."
     fi
 
-    echo "✅ Ollama is ready on http://127.0.0.1:11434/v1"
-    wait
+    echo "=========================================================="
+    echo "🎉 Ollama Metal Server Ready!"
+    echo "   - OpenAI API Endpoint: http://127.0.0.1:11434/v1"
+    echo "   - Model ID:            $MODEL_TAG"
+    echo "   - Acceleration:        Apple Metal GPU (via llama.cpp backend)"
+    echo "   - Memory Context:      32,768 tokens"
+    echo "=========================================================="
 fi

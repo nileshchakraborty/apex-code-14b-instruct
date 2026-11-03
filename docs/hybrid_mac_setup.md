@@ -31,33 +31,30 @@ The **Option B Hybrid Architecture** delivers the absolute best experience on Ap
 
 ## 🚀 Step-by-Step Setup
 
-### Step 1: Install Host Metal Server (One-Time)
-If you haven't installed `llama.cpp` on macOS:
+### Step 1: Use Your Native Ollama (llama.cpp Metal backend)
+Because Ollama on Apple Silicon is already compiled with `llama.cpp` and Apple Metal acceleration:
+1. Ensure Ollama is active on `http://127.0.0.1:11434`.
+2. Create the optimized 36 GB profile (32k context, temperature 0.2):
 ```bash
-brew install llama.cpp
-```
-*(Alternatively, you can use the installed `ollama` daemon).*
-
-### Step 2: Download the Quantized Weights
-```bash
-bash scripts/download_models.sh
+ollama create apex-coder-14b -f configs/ollama/Modelfile.apex-coder-14b
 ```
 
-### Step 3: Launch Native Host Metal Server
-In your first terminal tab:
+*(Alternatively, if you prefer standalone `llama-server` with dual-model speculative decoding, run `brew install llama.cpp && bash scripts/download_models.sh`).*
+
+### Step 2: Verify Host Server
+Run the host launcher (auto-detects active Ollama or llama-server):
 ```bash
 bash scripts/start_host_metal_server.sh
 ```
-*Your server is live at `http://127.0.0.1:8080/v1` with full Apple Metal GPU acceleration.*
 
-### Step 4: Run Isolated Tooling & Benchmarks in Docker
-In a second terminal tab:
+### Step 3: Run Isolated Tooling & Benchmarks in Docker
+In your terminal, execute the sandboxed test runner via Docker:
 ```bash
-# Run isolated throughput benchmark via Docker
-docker-compose -f docker-compose.hybrid.yml run --rm hybrid-bench
+# Benchmark host Ollama from inside Docker sandbox
+docker-compose -f docker-compose.hybrid.yml run --rm ollama-bench
 
-# Or generate synthetic code datasets inside the Docker sandbox
-docker-compose -f docker-compose.hybrid.yml run --rm dataset-tool
+# Or run the automatic orchestrator
+bash scripts/run_hybrid_stack.sh
 ```
 
 ---

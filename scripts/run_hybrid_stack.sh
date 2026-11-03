@@ -14,21 +14,35 @@ if ! docker info &> /dev/null; then
     exit 1
 fi
 
-SERVER_URL="http://127.0.0.1:8080/v1"
-echo "🔍 Checking if host Metal server is reachable at $SERVER_URL..."
+# Auto-detect whether host is running on llama-server (8080) or Ollama (11434)
+TARGET_PORT="8080"
+MODEL_ALIAS="qwen2.5-coder-14b-instruct"
 
-if ! curl -s --max-time 2 "http://127.0.0.1:8080/health" &> /dev/null && ! curl -s --max-time 2 "http://127.0.0.1:8080/v1/models" &> /dev/null; then
-    echo "⚠️ Host Metal server is not currently running."
-    echo "💡 In another terminal window, start the host Metal server:"
+if curl -s --max-time 2 "http://127.0.0.1:11434/api/version" &> /dev/null; then
+    TARGET_PORT="11434"
+    MODEL_ALIAS="apex-coder-14b"
+    echo "✅ Detected active host Ollama engine (llama.cpp Metal backend) on port 11434."
+elif curl -s --max-time 2 "http://127.0.0.1:8080/v1/models" &> /dev/null || curl -s --max-time 2 "http://127.0.0.1:8080/health" &> /dev/null; then
+    TARGET_PORT="8080"
+    MODEL_ALIAS="qwen2.5-coder-14b-instruct"
+    echo "✅ Detected active native llama-server on port 8080."
+else
+    echo "⚠️ Neither Ollama (11434) nor llama-server (8080) appears reachable."
+    echo "💡 In another terminal window, start your host server:"
     echo "   bash scripts/start_host_metal_server.sh"
     echo ""
     read -p "Press [Enter] once the host server is active, or Ctrl+C to cancel..."
+    if curl -s --max-time 2 "http://127.0.0.1:11434/api/version" &> /dev/null; then
+        TARGET_PORT="11434"
+        MODEL_ALIAS="apex-coder-14b"
+    fi
 fi
 
-echo "✅ Host Metal server is active."
-echo "🐳 Launching Docker containerized benchmark (sandboxed)..."
+echo "🐳 Launching Docker containerized benchmark (sandboxed) against host port $TARGET_PORT..."
 
-docker-compose -f docker-compose.hybrid.yml run --rm hybrid-bench
+docker-compose -f docker-compose.hybrid.yml run --rm hybrid-bench \
+  --url "http://host.docker.internal:${TARGET_PORT}" \
+  --model "$MODEL_ALIAS"
 
 echo "=========================================================="
 echo "✅ Option B Hybrid Execution Completed!"
