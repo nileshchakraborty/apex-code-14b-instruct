@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  apex-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apex-code-36gb:latest
+    container_name: apex-code-server
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      # Mount host models directory directly into container
+      - ./models:/app/models:ro
+      - ./datasets:/app/datasets:ro
+      - ./logs:/app/logs:rw
+    environment:
+      - HOST=0.0.0.0
+      - PORT=8080
+      - CTX_SIZE=32768
+    deploy:
+      resources:
+        limits:
+          # Hard memory ceiling: guarantees container never exceeds 22 GB,
+          # isolating host OS from any risk of OOM thrashing
+          memory: 22G
+          cpus: '8.0'
+        reservations:
+          memory: 12G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+  apex-bench:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: apex-code-bench
+    depends_on:
+      apex-server:
+        condition: service_healthy
+    entrypoint: ["python3", "scripts/benchmark_throughput.py"]
+    command: ["--url", "http://apex-server:8080"]
+    profiles:
+      - benchmark

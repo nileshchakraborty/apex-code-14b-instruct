@@ -95,6 +95,18 @@ ollama create apex-coder-14b -f configs/ollama/Modelfile.apex-coder-14b
 ollama run apex-coder-14b
 ```
 
+### 5. Alternative: Containerized Docker Isolation
+To isolate the server and enforce strict hardware boundaries (preventing host OOM):
+```bash
+# Build and run with strict 22 GB memory limit
+docker-compose up -d apex-server
+
+# Inspect real-time isolated resource metrics
+docker stats apex-code-server
+```
+*(See [docs/docker_isolation_guide.md](docs/docker_isolation_guide.md) for Apple Silicon vs. Linux GPU passthrough details).*
+
+
 ---
 
 ## 📁 Repository Structure
