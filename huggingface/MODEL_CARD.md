@@ -1,7 +1,7 @@
 ---
 language:
 - en
-license: apache-2.0
+license: mit
 library_name: transformers
 pipeline_tag: text-generation
 tags:
@@ -107,4 +107,4 @@ llama-server \
 ## 📜 Citation & Credits
 - Base Model: [Qwen2.5-Coder-14B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct) by the Qwen Team.
 - Optimization & Serving Pipeline: [ApexCode-36GB](https://github.com/nileshchakraborty/apex-code-36gb) by Nilesh Chakraborty.
-- License: Apache 2.0.
+- License: MIT.
