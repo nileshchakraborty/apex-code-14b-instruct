@@ -159,7 +159,7 @@ class ThreadedHTTPServer(socketserver.ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 
-def run_router(port: int = 8000, host: str = "0.0.0.0"):
+def run_router(port: int = 8090, host: str = "0.0.0.0"):
     print("=" * 64)
     print("⚡ Apex Intelligent Router Gateway")
     print(f"Listening on: http://{host}:{port}/v1")
@@ -179,7 +179,7 @@ def run_router(port: int = 8000, host: str = "0.0.0.0"):
 
 def main():
     parser = argparse.ArgumentParser(description="Apex Intelligent Router Gateway")
-    parser.add_argument("--port", type=int, default=8000, help="Gateway port (default: 8000)")
+    parser.add_argument("--port", type=int, default=8090, help="Gateway port (default: 8090)")
     parser.add_argument("--host", default="0.0.0.0", help="Host binding (default: 0.0.0.0)")
     args = parser.parse_args()
     run_router(port=args.port, host=args.host)

@@ -4,7 +4,7 @@
       "title": "Apex-Auto (Intelligent Router)",
       "provider": "openai",
       "model": "apex-auto",
-      "apiBase": "http://127.0.0.1:8000/v1",
+      "apiBase": "http://127.0.0.1:8090/v1",
       "apiKey": "none",
       "contextLength": 32768
     },
