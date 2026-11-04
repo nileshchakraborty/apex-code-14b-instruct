@@ -1,24 +1,31 @@
 {
   "models": [
     {
-      "title": "ApexCode-14B Speculative (Local)",
+      "title": "Apex-Auto (Intelligent Router)",
       "provider": "openai",
-      "model": "qwen2.5-coder-14b-instruct",
-      "apiBase": "http://127.0.0.1:8080/v1",
+      "model": "apex-auto",
+      "apiBase": "http://127.0.0.1:8000/v1",
       "apiKey": "none",
-      "contextLength": 32768,
-      "completionOptions": {
-        "temperature": 0.2,
-        "topP": 0.95
-      }
+      "contextLength": 32768
+    },
+    {
+      "title": "ApexCode-14B (Fast Coding & Diffs)",
+      "provider": "ollama",
+      "model": "apex-coder-14b",
+      "apiBase": "http://127.0.0.1:11434"
+    },
+    {
+      "title": "ApexThink-14B (Deep Reasoning & Anti-Hallucination)",
+      "provider": "ollama",
+      "model": "apex-think-14b",
+      "apiBase": "http://127.0.0.1:11434"
     }
   ],
   "tabAutocompleteModel": {
-    "title": "ApexCode-FIM Autocomplete",
-    "provider": "openai",
-    "model": "qwen2.5-coder-14b-instruct",
-    "apiBase": "http://127.0.0.1:8080/v1",
-    "apiKey": "none"
+    "title": "ApexCode Autocomplete",
+    "provider": "ollama",
+    "model": "apex-coder-14b",
+    "apiBase": "http://127.0.0.1:11434"
   },
   "customCommands": [
     {

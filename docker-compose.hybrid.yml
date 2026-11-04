@@ -43,6 +43,25 @@ services:
           memory: 4G
           cpus: '4.0'
 
+  # Unified Intelligent Router Gateway (Port 8000)
+  apex-router:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: apex-code-36gb:latest
+    container_name: apex-unified-router
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    entrypoint: ["python3", "scripts/apex_router.py"]
+    command: ["--port", "8000", "--host", "0.0.0.0"]
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '2.0'
+
   # Isolated Dataset & Pipeline Sandbox
   dataset-tool:
     build:
