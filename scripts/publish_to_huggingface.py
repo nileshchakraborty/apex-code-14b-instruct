@@ -57,10 +57,10 @@ def publish(
     else:
         print(f"⚠️ Model card not found at {model_card_path}, skipping README upload.")
 
-    # Step 3: Upload Ollama Modelfile
+    # Step 3: Upload Ollama Modelfiles & Test Artifacts
     modelfile_path = "./configs/ollama/Modelfile.apex-coder-14b"
     if os.path.isfile(modelfile_path):
-        print("⚙️ Uploading Ollama Modelfile...")
+        print("⚙️ Uploading Ollama Modelfile (ApexCode-14B)...")
         api.upload_file(
             path_or_fileobj=modelfile_path,
             path_in_repo="Modelfile",
@@ -69,12 +69,35 @@ def publish(
             commit_message="feat: add 36GB-optimized Ollama Modelfile",
         )
 
+    think_modelfile_path = "./configs/ollama/Modelfile.apex-think-14b"
+    if os.path.isfile(think_modelfile_path):
+        print("⚙️ Uploading Ollama Modelfile (ApexThink-14B)...")
+        api.upload_file(
+            path_or_fileobj=think_modelfile_path,
+            path_in_repo="Modelfile.apex-think-14b",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="feat: add 36GB-optimized Ollama Modelfile for ApexThink-14B",
+        )
+
+    test_results_path = "./tests/end_to_end_test_results.json"
+    if os.path.isfile(test_results_path):
+        print("📊 Uploading Verified End-to-End Test Results...")
+        api.upload_file(
+            path_or_fileobj=test_results_path,
+            path_in_repo="end_to_end_test_results.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add verified 5/5 end-to-end benchmark test results",
+        )
+
     # Step 4: Scan and upload model weights (.gguf / .safetensors)
     if not os.path.isdir(model_dir):
         print(f"⚠️ Model directory '{model_dir}' does not exist.")
         print("   If you only wanted to publish the Model Card, you are done!")
         return
 
+    existing_files = set(api.list_repo_files(repo_id=repo_id, repo_type="model"))
     valid_extensions = (".gguf", ".safetensors", ".json", ".txt")
     files_to_upload = [
         f for f in os.listdir(model_dir) if f.lower().endswith(valid_extensions) and not f.startswith(".")
@@ -85,13 +108,18 @@ def publish(
         print("💡 Download or generate weights with 'bash scripts/download_models.sh' to upload them.")
         return
 
-    print(f"\n📦 Found {len(files_to_upload)} files to upload from {model_dir}:")
+    print(f"\n📦 Found {len(files_to_upload)} files in {model_dir}:")
     for f in files_to_upload:
         file_path = os.path.join(model_dir, f)
         size_gb = os.path.getsize(file_path) / (1024**3)
-        print(f"   • {f} ({size_gb:.2f} GB)")
+        already_present = f in existing_files
+        status_tag = " (already on Hub)" if already_present else " (NEW)"
+        print(f"   • {f} ({size_gb:.2f} GB){status_tag}")
 
     for f in files_to_upload:
+        if f in existing_files:
+            print(f"⏭️ Skipping {f} (already exists on Hugging Face Hub).")
+            continue
         file_path = os.path.join(model_dir, f)
         print(f"\n🚀 Uploading {f}...")
         api.upload_file(
