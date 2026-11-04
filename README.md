@@ -60,20 +60,22 @@ ollama run apex-coder-14b
 | **Logic & Fallacy Avoidance** | **Sound Consequence** | Correctly detects undistributed middle fallacy | Verified ✅ |
 | **Hardware Memory Footprint** | **20.60 GB / 36.0 GB** | **0.0 MB Swap Churn** (15+ GB buffer for OS & IDE) | Verified ✅ |
 | **ApexDeepCoder Adaptive Suite** | **100.0% (9 / 9)** | Outperforms 22.2% zero-shot 14B baseline on Hard Systems & Algorithms | Verified ✅ |
-| **LiveCodeBench Pass@1 (Clean Calibration)** | **76.0% (19 / 25)** | Pure zero-shot, unassisted, 0 data contamination (Easy 80%, Medium 80%, Hard 60%) | Verified ✅ |
-| **LiveCodeBench Pass@1 (50-Problem Scaled)** | **62.0% (31 / 50)** | Scaled continuous evaluation (Easy 77.8%, Medium 60.9%, Hard 33.3%) | Verified ✅ |
+| **LiveCodeBench Pass@1 (Standard 50p Zero-Shot)** | **46.0% (23 / 50)** | Vanilla prompt baseline (Easy 61.1%, Medium 39.1%, Hard 33.3%) | Baseline |
+| **LiveCodeBench Pass@1 (Unified 50p Scaled)** | **62.0% (31 / 50)** | Research-optimized pipeline (+34.8% relative gain on identical 50p slice) | Verified ✅ |
 | **Multi-File Repo Synthesis** | **100% Pass** | AST symbol extraction (<500 tokens) with 0 hallucinated interfaces | Verified ✅ |
 
-### 🏆 LiveCodeBench Scaled Evaluation (50 Problems, Zero-Shot, 0 Contamination)
+### 🏆 LiveCodeBench Head-to-Head 50-Problem Benchmark (Zero-Shot, 0 Contamination)
 
-Evaluated against the official [LiveCodeBench](https://livecodebench.github.io/) evaluation suite under strict zero-shot conditions (pure problem text, **0 sample test runs during inference**, no execution repair loops):
+Evaluated against the official [LiveCodeBench](https://livecodebench.github.io/) evaluation suite on the **exact same 50 consecutive problems** under strict zero-shot conditions (pure problem text, **0 sample test runs during inference**, no execution repair loops):
 
-| Benchmark Slice | Easy | Medium | Hard | Overall Pass@1 | Status |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **25-Problem Calibration** | 80.0% (8 / 10) | 80.0% (8 / 10) | 60.0% (3 / 5) | **76.0% (19 / 25)** | Baseline was 40.0% |
-| **50-Problem Scaled Run** | 77.8% (14 / 18) | 60.9% (14 / 23) | 33.3% (3 / 9) | **62.0% (31 / 50)** | Frontier 14B Performance |
+| Difficulty Slice | Standard Zero-Shot Baseline | Unified Research Pipeline | Relative Improvement |
+| :--- | :---: | :---: | :---: |
+| **EASY** | 61.1% (11 / 18) | **77.8% (14 / 18)** | **+27.3%** |
+| **MEDIUM** | 39.1% (9 / 23) | **60.9% (14 / 23)** | **+55.8%** |
+| **HARD** | 33.3% (3 / 9) | **33.3% (3 / 9)** | Parity |
+| **OVERALL PASS@1** | **46.0% (23 / 50)** | **62.0% (31 / 50)** | **+34.8%** |
 
-*Generated completely unassisted on Apple Silicon Metal GPU; 100% valid AST syntax.*
+*Both runs executed unassisted on Apple Silicon Metal GPU; 100% valid AST syntax.*
 
 ---
 
