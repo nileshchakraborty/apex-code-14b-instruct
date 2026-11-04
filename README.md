@@ -162,6 +162,17 @@ apex-code-36gb/
 
 > **Result:** ApexCode-14B Speculative delivers **90% HumanEval accuracy** (parity with GPT-4) at **over 55 tokens/second**, leaving **23+ GB of RAM free** for local workflows.
 
+### 6. Hugging Face Deployment
+Deploy the model card, GGUF weights, and interactive Gradio Space:
+```bash
+# Publish Model Card and configs to Hugging Face Hub:
+python3 scripts/publish_to_huggingface.py --repo-id "nileshc90/apex-code-14b-instruct"
+
+# Run anywhere in the world directly via Ollama:
+ollama run hf.co/nileshc90/apex-code-14b-instruct:Q5_K_M
+```
+*(See [docs/huggingface_deployment_guide.md](docs/huggingface_deployment_guide.md) for full deployment instructions).*
+
 ---
 
 ## 🤝 IDE Integration
