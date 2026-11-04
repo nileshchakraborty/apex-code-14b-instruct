@@ -1,0 +1,372 @@
+{
+  "target_problems": [
+    "1873_B",
+    "1873_D",
+    "1883_B",
+    "1883_C",
+    "1899_A",
+    "1899_C",
+    "2754",
+    "2777",
+    "2784",
+    "2808",
+    "2817",
+    "2827",
+    "2832",
+    "2833",
+    "2837",
+    "2839",
+    "2849",
+    "2850",
+    "2854"
+  ],
+  "recovered_count": 7,
+  "total_target": 19,
+  "recovery_rate": 36.84210526315789,
+  "problems": [
+    {
+      "question_id": "1873_B",
+      "question_title": "B. Good Kid",
+      "difficulty": "easy",
+      "latency_sec": 5.89,
+      "tokens": 175,
+      "arbitration_meta": {
+        "routing": "System 1 (Easy Fast-Path)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Easy problem routed to clean greedy decoding to prevent overthinking.",
+        "diverged": false
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        index += 1\n        \n        digits = list(map(int, input[index:index + n]))\n        index += n\n        \n        max_product = 0\n        \n        for i in range(n):\n            new_digits = digits[:]\n            new_digits[i] += 1\n            product = 1\n            for digit in new_digits:\n                product *= digit\n            if product > max_product:\n                max_product = product\n        \n        results.append(max_product)\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13
+    },
+    {
+      "question_id": "1873_D",
+      "question_title": "D. 1D Eraser",
+      "difficulty": "easy",
+      "latency_sec": 7.34,
+      "tokens": 204,
+      "arbitration_meta": {
+        "routing": "System 1 (Easy Fast-Path)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Easy problem routed to clean greedy decoding to prevent overthinking.",
+        "diverged": false
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        k = int(input[index + 1])\n        s = input[index + 2]\n        index += 3\n        \n        # Count the number of black cells\n        black_count = s.count('B')\n        \n        # If there are no black cells, no operations are needed\n        if black_count == 0:\n            results.append(0)\n            continue\n        \n        # Calculate the minimum number of operations needed\n        # Each operation can cover at most k consecutive black cells\n        operations = (black_count + k - 1) // k\n        \n        results.append(operations)\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1883_B",
+      "question_title": "B. Chemistry",
+      "difficulty": "medium",
+      "latency_sec": 9.99,
+      "tokens": 259,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        k = int(input[index + 1])\n        s = input[index + 2]\n        index += 3\n        \n        # Count the frequency of each character\n        freq = [0] * 26\n        for char in s:\n            freq[ord(char) - ord('a')] += 1\n        \n        # Count how many characters have an odd frequency\n        odd_count = sum(1 for count in freq if count % 2 != 0)\n        \n        # To form a palindrome, we can have at most one character with an odd frequency\n        # The number of deletions needed is the difference between odd_count and 1\n        needed_deletions = max(0, odd_count - 1)\n        \n        if needed_deletions <= k:\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n    \n    print(\"\\n\".join(results))\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 4,
+      "total_cases": 4
+    },
+    {
+      "question_id": "1883_C",
+      "question_title": "C. Raspberries",
+      "difficulty": "medium",
+      "latency_sec": 16.86,
+      "tokens": 493,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        k = int(input[index + 1])\n        index += 2\n        \n        a = list(map(int, input[index:index + n]))\n        index += n\n        \n        if k == 2:\n            # Check for even numbers\n            has_even = any(x % 2 == 0 for x in a)\n            if has_even:\n                results.append(0)\n            else:\n                # Find the smallest odd number and increment it once\n                min_odd = min(x for x in a if x % 2 != 0)\n                results.append(1)\n        elif k == 3:\n            # Check for multiples of 3\n            has_multiple_of_3 = any(x % 3 == 0 for x in a)\n            if has_multiple_of_3:\n                results.append(0)\n            else:\n                # Find the smallest number not divisible by 3 and increment it twice\n                min_not_div_3 = min(x for x in a if x % 3 != 0)\n                results.append(2)\n        elif k == 4:\n            # Check for multiples of 4\n            has_multiple_of_4 = any(x % 4 == 0 for x in a)\n            if has_multiple_of_4:\n                results.append(0)\n            else:\n                # Find the smallest number not divisible by 2 and increment it twice\n                min_not_div_2 = min(x for x in a if x % 2 != 0)\n                results.append(2)\n        elif k == 5:\n            # Check for multiples of 5\n            has_multiple_of_5 = any(x % 5 == 0 for x in a)\n            if has_multiple_of_5:\n                results.append(0)\n            else:\n                # Find the smallest number not divisible by 5 and increment it four times\n                min_not_div_5 = min(x for x in a if x % 5 != 0)\n                results.append(4)\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1899_A",
+      "question_title": "A. Game with Integers",
+      "difficulty": "easy",
+      "latency_sec": 5.38,
+      "tokens": 144,
+      "arbitration_meta": {
+        "routing": "System 1 (Easy Fast-Path)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Easy problem routed to clean greedy decoding to prevent overthinking.",
+        "diverged": false
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        index += 1\n        \n        # Determine the winner based on the rules\n        if (n + 1) % 3 == 0 or (n - 1) % 3 == 0:\n            results.append(\"First\")\n        else:\n            results.append(\"Second\")\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13
+    },
+    {
+      "question_id": "1899_C",
+      "question_title": "C. Yarik and Array",
+      "difficulty": "hard",
+      "latency_sec": 54.37,
+      "tokens": 1015,
+      "arbitration_meta": {
+        "routing": "Hard Invariant Arbitration",
+        "winner_label": "B (Invariant Depth)",
+        "reason": "Hard problem: selected Invariant Induction candidate for algebraic coverage (A=5 vs B=6)",
+        "diverged": true,
+        "test_input": "3\n1\n-1000\n2\n-1 1\n4\n-1 2 -1 0",
+        "stdout_a": "-1000\n1\n0",
+        "stdout_b": "-1000\n1\n1"
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        index += 1\n        \n        a = list(map(int, input[index:index + n]))\n        index += n\n        \n        if n == 1:\n            results.append(a[0])\n            continue\n        \n        ans = cur = a[0]\n        last_parity = a[0] % 2\n        \n        for i in range(1, n):\n            if a[i] % 2 != last_parity:\n                cur += a[i]\n                last_parity = a[i] % 2\n            else:\n                cur = a[i]\n                last_parity = a[i] % 2\n            \n            ans = max(ans, cur)\n        \n        results.append(ans)\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2754",
+      "question_title": "maximum-strength-of-a-group",
+      "difficulty": "medium",
+      "latency_sec": 29.86,
+      "tokens": 804,
+      "arbitration_meta": {
+        "routing": "System 2 Fallback",
+        "winner_label": "B (Linter Audit)",
+        "reason": "Candidate A contained semantic bug: Unsafe Negative Stride: Stepping by 2 over 'len(negatives)' without explicit odd parity check may produce an odd count of negative numbers and invert product sign.",
+        "diverged": true,
+        "test_input": null,
+        "stdout_a": null,
+        "stdout_b": null
+      },
+      "code": "class Solution:\n    def maxStrength(self, nums: List[int]) -> int:\n        # Sort the numbers to handle negative numbers and zeroes easily\n        nums.sort()\n        \n        # Initialize the result to 1 (multiplicative identity)\n        result = 1\n        has_positive = False\n        \n        # Iterate through the sorted numbers\n        for num in nums:\n            if num > 0:\n                # Include all positive numbers\n                result *= num\n                has_positive = True\n            elif num < 0:\n                # Include pairs of negative numbers\n                if len(nums) % 2 == 1 and nums[-1] == num:\n                    # If there's an odd number of negative numbers and we're at the last one, skip it\n                    continue\n                result *= num\n        \n        # If there are no positive numbers and an odd number of negative numbers, return the largest negative number\n        if not has_positive and len(nums) % 2 == 1:\n            return nums[-1]\n        \n        return result",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2777",
+      "question_title": "find-the-distinct-difference-array",
+      "difficulty": "easy",
+      "latency_sec": 12.0,
+      "tokens": 287,
+      "arbitration_meta": {
+        "routing": "System 1 (Easy Fast-Path)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Easy problem routed to clean greedy decoding to prevent overthinking.",
+        "diverged": false
+      },
+      "code": "from typing import List\n\nclass Solution:\n    def distinctDifferenceArray(self, nums: List[int]) -> List[int]:\n        n = len(nums)\n        prefix_distinct = [0] * n\n        suffix_distinct = [0] * n\n        \n        # Calculate distinct elements in the prefix\n        seen = set()\n        for i in range(n):\n            seen.add(nums[i])\n            prefix_distinct[i] = len(seen)\n        \n        # Calculate distinct elements in the suffix\n        seen.clear()\n        for i in range(n - 1, -1, -1):\n            suffix_distinct[i] = len(seen)\n            seen.add(nums[i])\n        \n        # Calculate the distinct difference array\n        diff = [0] * n\n        for i in range(n):\n            diff[i] = prefix_distinct[i] - suffix_distinct[i]\n        \n        return diff\n\n# Example usage:\nif __name__ == '__main__':\n    sol = Solution()\n    print(sol.distinctDifferenceArray([1, 2, 3, 4, 5]))  # Output: [-3, -1, 1, 3, 5]\n    print(sol.distinctDifferenceArray([3, 2, 3, 4, 2]))  # Output: [-2, -1, 0, 2, 3]",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2784",
+      "question_title": "power-of-heroes",
+      "difficulty": "hard",
+      "latency_sec": 45.26,
+      "tokens": 919,
+      "arbitration_meta": {
+        "routing": "Hard Invariant Arbitration",
+        "winner_label": "A (Occam's Complexity)",
+        "reason": "Function-level problem: chose lower AST complexity (A=2 vs B=2)",
+        "diverged": true,
+        "test_input": null,
+        "stdout_a": null,
+        "stdout_b": null
+      },
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def sumOfPower(self, nums: List[int]) -> int:\n        MOD = 10**9 + 7\n        nums.sort()\n        total_power = 0\n        prefix_sum = 0\n        \n        for i, num in enumerate(nums):\n            # Calculate the contribution of the current number as the maximum\n            max_contribution = (num * num % MOD * (prefix_sum + num) % MOD) % MOD\n            total_power = (total_power + max_contribution) % MOD\n            \n            # Update the prefix sum to include the current number\n            prefix_sum = (prefix_sum * 2 + num) % MOD\n        \n        return total_power\n\ndef solve():\n    input = sys.stdin.read().split()\n    n = int(input[0])\n    nums = list(map(int, input[1:]))\n    solution = Solution()\n    print(solution.sumOfPower(nums))\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2808",
+      "question_title": "painting-the-walls",
+      "difficulty": "hard",
+      "latency_sec": 50.67,
+      "tokens": 820,
+      "arbitration_meta": {
+        "routing": "Hard Invariant Arbitration",
+        "winner_label": "A (Occam's Complexity)",
+        "reason": "Function-level problem: chose lower AST complexity (A=3 vs B=3)",
+        "diverged": true,
+        "test_input": null,
+        "stdout_a": null,
+        "stdout_b": null
+      },
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def paintWalls(self, cost: List[int], time: List[int]) -> int:\n        n = len(cost)\n        \n        # Initialize DP table\n        dp = [float('inf')] * (n + 1)\n        dp[0] = 0\n        \n        for i in range(n):\n            for j in range(n, -1, -1):\n                dp[j] = min(dp[j], dp[max(j - time[i] - 1, 0)] + cost[i])\n        \n        return dp[n]\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    n = int(input[0])\n    cost = list(map(int, input[1:n+1]))\n    time = list(map(int, input[n+1:2*n+1]))\n    \n    solution = Solution()\n    result = solution.paintWalls(cost, time)\n    print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2817",
+      "question_title": "minimum-cost-to-make-all-characters-equal",
+      "difficulty": "medium",
+      "latency_sec": 12.14,
+      "tokens": 203,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "class Solution:\n    def minimumCost(self, s: str) -> int:\n        n = len(s)\n        cost = 0\n        \n        # Convert string to list for easier manipulation\n        s = list(s)\n        \n        # Traverse the string from left to right\n        for i in range(1, n):\n            if s[i] != s[i - 1]:\n                # If characters are different, we need to invert\n                # We choose the cheaper operation between prefix and suffix inversion\n                cost += min(i, n - i)\n                # Invert the character at position i to match the previous one\n                s[i] = s[i - 1]\n        \n        return cost\n\n# Example usage:\nif __name__ == '__main__':\n    sol = Solution()\n    print(sol.minimumCost(\"0011\"))  # Output: 2\n    print(sol.minimumCost(\"010101\"))  # Output: 9",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2827",
+      "question_title": "greatest-common-divisor-traversal",
+      "difficulty": "hard",
+      "latency_sec": 86.77,
+      "tokens": 1692,
+      "arbitration_meta": {
+        "routing": "Hard Invariant Arbitration",
+        "winner_label": "B (Invariant Depth)",
+        "reason": "Hard problem: selected Invariant Induction candidate for algebraic coverage (A=17 vs B=17)",
+        "diverged": false,
+        "test_input": "3\n2 3 6\n3 9 5\n4 3 12 8",
+        "stdout_a": "false",
+        "stdout_b": "false"
+      },
+      "code": "from typing import List\nimport sys\n\nclass UnionFind:\n    def __init__(self, size):\n        self.parent = list(range(size))\n        self.rank = [0] * size\n\n    def find(self, x):\n        if self.parent[x] != x:\n            self.parent[x] = self.find(self.parent[x])\n        return self.parent[x]\n\n    def union(self, x, y):\n        rootX = self.find(x)\n        rootY = self.find(y)\n        if rootX != rootY:\n            if self.rank[rootX] > self.rank[rootY]:\n                self.parent[rootY] = rootX\n            elif self.rank[rootX] < self.rank[rootY]:\n                self.parent[rootX] = rootY\n            else:\n                self.parent[rootY] = rootX\n                self.rank[rootX] += 1\n\ndef prime_factors(n):\n    factors = set()\n    # Check for number of 2s that divide n\n    while n % 2 == 0:\n        factors.add(2)\n        n //= 2\n    # n must be odd at this point, so a skip of 2 (i.e., i = i + 2) can be used\n    for i in range(3, int(n**0.5) + 1, 2):\n        # While i divides n, add i and divide n\n        while n % i == 0:\n            factors.add(i)\n            n //= i\n    # This condition is to check if n is a prime number greater than 2\n    if n > 2:\n        factors.add(n)\n    return factors\n\nclass Solution:\n    def canTraverseAllPairs(self, nums: List[int]) -> bool:\n        if len(nums) == 1:\n            return True\n        \n        # If there's a 1 in the array, we cannot traverse to it from any other number\n        if 1 in nums:\n            return False\n        \n        uf = UnionFind(len(nums))\n        \n        for i, num in enumerate(nums):\n            factors = prime_factors(num)\n            first_factor = None\n            for factor in factors:\n                if first_factor is None:\n                    first_factor = factor\n                else:\n                    uf.union(i, nums.index(first_factor))\n        \n        # Check if all numbers are in the same connected component\n        root = uf.find(0)\n        for i in range(1, len(nums)):\n            if uf.find(i) != root:\n                return False\n        \n        return True\n\nif __name__ == '__main__':\n    def solve():\n        import sys\n        input = sys.stdin.read\n        data = list(map(int, input().split()))\n        n = data[0]\n        nums = data[1:]\n        solution = Solution()\n        result = solution.canTraverseAllPairs(nums)\n        print(\"true\" if result else \"false\")\n    \n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2832",
+      "question_title": "find-the-longest-equal-subarray",
+      "difficulty": "medium",
+      "latency_sec": 13.86,
+      "tokens": 302,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "from collections import defaultdict\nfrom typing import List\n\nclass Solution:\n    def longestEqualSubarray(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        index_map = defaultdict(list)\n        \n        # Map each number to its indices in the array\n        for i, num in enumerate(nums):\n            index_map[num].append(i)\n        \n        max_length = 0\n        \n        # For each unique number, find the longest subarray\n        for indices in index_map.values():\n            left = 0\n            for right in range(len(indices)):\n                # Calculate the number of deletions needed to make the subarray equal\n                deletions_needed = indices[right] - indices[left] - (right - left)\n                while deletions_needed > k:\n                    left += 1\n                    deletions_needed = indices[right] - indices[left] - (right - left)\n                # Update the maximum length of the equal subarray\n                max_length = max(max_length, right - left + 1)\n        \n        return max_length\n\n# Example usage\nif __name__ == '__main__':\n    sol = Solution()\n    print(sol.longestEqualSubarray([1,3,2,3,1,3], 3))  # Output: 3\n    print(sol.longestEqualSubarray([1,1,2,2,1,1], 2))  # Output: 4",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2833",
+      "question_title": "count-zero-request-servers",
+      "difficulty": "medium",
+      "latency_sec": 22.3,
+      "tokens": 505,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def countServers(self, n: int, logs: List[List[int]], x: int, queries: List[int]) -> List[int]:\n        # Sort logs by time\n        logs.sort(key=lambda log: log[1])\n        \n        # Sort queries and keep track of original indices\n        sorted_queries = sorted((time, idx) for idx, time in enumerate(queries))\n        \n        # Initialize variables\n        server_count = [0] * (n + 1)\n        active_logs = []\n        left = 0\n        result = [0] * len(queries)\n        \n        # Process each query in sorted order\n        for query_time, query_idx in sorted_queries:\n            # Add logs that fall within the current query time window\n            while left < len(logs) and logs[left][1] <= query_time:\n                server_id, log_time = logs[left]\n                server_count[server_id] += 1\n                active_logs.append((log_time, server_id))\n                left += 1\n            \n            # Remove logs that fall outside the current query time window\n            while active_logs and active_logs[0][0] < query_time - x:\n                log_time, server_id = active_logs.pop(0)\n                server_count[server_id] -= 1\n            \n            # Count servers with no requests in the current window\n            zero_request_servers = n - sum(server_count[1:])\n            result[query_idx] = zero_request_servers\n        \n        return result\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    idx = 0\n    n = int(input[idx])\n    idx += 1\n    \n    m = int(input[idx])\n    idx += 1\n    logs = []\n    for _ in range(m):\n        server_id = int(input[idx])\n        time = int(input[idx + 1])\n        logs.append([server_id, time])\n        idx += 2\n    \n    x = int(input[idx])\n    idx += 1\n    \n    q = int(input[idx])\n    idx += 1\n    queries = []\n    for _ in range(q):\n        queries.append(int(input[idx]))\n        idx += 1\n    \n    solution = Solution()\n    result = solution.countServers(n, logs, x, queries)\n    \n    print(\" \".join(map(str, result)))\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 6,
+      "total_cases": 7
+    },
+    {
+      "question_id": "2837",
+      "question_title": "minimum-operations-to-make-the-integer-zero",
+      "difficulty": "medium",
+      "latency_sec": 7.95,
+      "tokens": 155,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "class Solution:\n    def makeTheIntegerZero(self, num1: int, num2: int) -> int:\n        for k in range(1, 61):\n            target = num1 - k * num2\n            if target < 0:\n                break\n            if k <= target.bit_count() <= k and k <= target:\n                return k\n        return -1\n\nif __name__ == '__main__':\n    def solve():\n        import sys\n        input = sys.stdin.read().split()\n        num1 = int(input[0])\n        num2 = int(input[1])\n        solution = Solution()\n        result = solution.makeTheIntegerZero(num1, num2)\n        print(result)\n\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2839",
+      "question_title": "maximum-sum-queries",
+      "difficulty": "hard",
+      "latency_sec": 67.72,
+      "tokens": 1248,
+      "arbitration_meta": {
+        "routing": "Hard Invariant Arbitration",
+        "winner_label": "B (Execution Resilience)",
+        "reason": "Candidate A crashed or timed out on synthesized input: Traceback (most recent call last):\n  File \"<string>\", line 48, in <module>\n  File \"<string>\", line 44, in solve\n  File \"<string>\", line 19, in maximumSumQueries\nUnboundLocalError: cannot access local variable 'heapq' where it is not associated with a value",
+        "diverged": true,
+        "test_input": "3\n4 3 1 2\n2 4 9 5\n3\n4 1\n1 3\n2 5\n\n3\n3 2 5\n2 3 4\n3\n4 4\n3 2\n1 1\n\n2\n2 1\n2 3\n1\n3 3",
+        "stdout_a": "",
+        "stdout_b": "-1 6 -1 -1 -1 -1 -1 -1 -1"
+      },
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def maximumSumQueries(self, nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:\n        n = len(nums1)\n        pairs = sorted(zip(nums1, nums2), key=lambda x: x[0] + x[1], reverse=True)\n        max_sum = 0\n        max_heap = []\n        \n        for i in range(n):\n            while max_heap and max_heap[0][0] < pairs[i][0]:\n                _, val = max_heap.pop(0)\n                max_sum = max(max_sum, val)\n            if not max_heap or max_heap[0][1] < pairs[i][1]:\n                max_heap.append((pairs[i][0], pairs[i][1]))\n        \n        max_heap.sort(key=lambda x: x[0])\n        \n        def binary_search(x, y):\n            left, right = 0, len(max_heap)\n            while left < right:\n                mid = (left + right) // 2\n                if max_heap[mid][0] >= x and max_heap[mid][1] >= y:\n                    right = mid\n                else:\n                    left = mid + 1\n            return max_heap[left][0] + max_heap[left][1] if left < len(max_heap) else -1\n        \n        result = []\n        for x, y in queries:\n            result.append(binary_search(x, y))\n        \n        return result\n\nif __name__ == '__main__':\n    sys.setrecursionlimit(300_000)\n    input = sys.stdin.read().split()\n    n = int(input[0])\n    nums1 = list(map(int, input[1:n+1]))\n    nums2 = list(map(int, input[n+1:2*n+1]))\n    q = int(input[2*n+1])\n    queries = []\n    idx = 2*n+2\n    for _ in range(q):\n        x = int(input[idx])\n        y = int(input[idx+1])\n        queries.append([x, y])\n        idx += 2\n    \n    sol = Solution()\n    print(' '.join(map(str, sol.maximumSumQueries(nums1, nums2, queries))))",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2849",
+      "question_title": "sum-of-imbalance-numbers-of-all-subarrays",
+      "difficulty": "hard",
+      "latency_sec": 45.99,
+      "tokens": 956,
+      "arbitration_meta": {
+        "routing": "Hard Invariant Arbitration",
+        "winner_label": "B (Occam's Complexity)",
+        "reason": "Function-level problem: chose lower AST complexity (A=6 vs B=4)",
+        "diverged": true,
+        "test_input": null,
+        "stdout_a": null,
+        "stdout_b": null
+      },
+      "code": "from typing import List\n\nclass Solution:\n    def sumImbalanceNumbers(self, nums: List[int]) -> int:\n        n = len(nums)\n        total_imbalance = 0\n        \n        # Iterate over all possible subarrays\n        for start in range(n):\n            seen = set()\n            current_imbalance = 0\n            \n            for end in range(start, n):\n                num = nums[end]\n                \n                # Check if adding this number increases the imbalance\n                if num - 1 in seen and num + 1 in seen:\n                    current_imbalance -= 1\n                if num - 1 not in seen and num + 1 in seen:\n                    current_imbalance += 1\n                \n                # Add the current imbalance to the total\n                total_imbalance += current_imbalance\n                \n                # Mark this number as seen\n                seen.add(num)\n        \n        return total_imbalance\n\n# Example usage:\n# sol = Solution()\n# print(sol.sumImbalanceNumbers([2, 3, 1, 4]))  # Output: 3\n# print(sol.sumImbalanceNumbers([1, 3, 3, 3, 5]))  # Output: 8",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2850",
+      "question_title": "construct-the-longest-new-string",
+      "difficulty": "medium",
+      "latency_sec": 10.68,
+      "tokens": 223,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "class Solution:\n    def longestString(self, x: int, y: int, z: int) -> int:\n        # The maximum length of the string is determined by the number of \"AA\" and \"BB\" we can use.\n        # We can use at most min(x, y) pairs of \"AA\" and \"BB\" without creating \"AAA\" or \"BBB\".\n        # If x != y, we can use one more of the less frequent type.\n        max_pairs = 2 * min(x, y)\n        if x != y:\n            max_pairs += 1\n        \n        # Each pair contributes 4 characters, and each \"AB\" contributes 2 characters.\n        return 4 * max_pairs + 2 * z\n\n# Example usage:\nif __name__ == '__main__':\n    solution = Solution()\n    print(solution.longestString(2, 5, 1))  # Output: 12\n    print(solution.longestString(3, 2, 2))  # Output: 14",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2854",
+      "question_title": "decremental-string-concatenation",
+      "difficulty": "medium",
+      "latency_sec": 22.87,
+      "tokens": 521,
+      "arbitration_meta": {
+        "routing": "System 1 (Medium Clean Linter)",
+        "winner_label": "System 1 (Clean Greedy)",
+        "reason": "Medium problem passed semantic AST linter cleanly.",
+        "diverged": false
+      },
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def minimizeConcatenatedLength(self, words: List[str]) -> int:\n        n = len(words)\n        \n        # dp[i][j][k] will store the minimum length of the concatenated string\n        # after processing the first i words, with the j-th character as the start\n        # and the k-th character as the end.\n        dp = [[[float('inf')] * 26 for _ in range(26)] for _ in range(n)]\n        \n        # Initialize the first word\n        first_word = words[0]\n        dp[0][ord(first_word[0]) - ord('a')][ord(first_word[-1]) - ord('a')] = len(first_word)\n        \n        for i in range(1, n):\n            current_word = words[i]\n            start_char = ord(current_word[0]) - ord('a')\n            end_char = ord(current_word[-1]) - ord('a')\n            current_length = len(current_word)\n            \n            for j in range(26):\n                for k in range(26):\n                    if dp[i-1][j][k] == float('inf'):\n                        continue\n                    \n                    # Case 1: Join current_word to the end of the previous string\n                    new_end_char = end_char if j == start_char else k\n                    dp[i][j][new_end_char] = min(dp[i][j][new_end_char], dp[i-1][j][k] + current_length - (j == start_char))\n                    \n                    # Case 2: Join the previous string to the start of current_word\n                    new_start_char = start_char if k == end_char else j\n                    dp[i][new_start_char][k] = min(dp[i][new_start_char][k], dp[i-1][j][k] + current_length - (k == end_char))\n        \n        # Find the minimum length of the final concatenated string\n        min_length = float('inf')\n        for j in range(26):\n            for k in range(26):\n                min_length = min(min_length, dp[n-1][j][k])\n        \n        return min_length\n\ndef solve():\n    input = sys.stdin.read().split()\n    n = int(input[0])\n    words = input[1:1+n]\n    solution = Solution()\n    print(solution.minimizeConcatenatedLength(words))\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    }
+  ]
+}
