@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "apex-code-36gb"
+name = "apex-code-14b-instruct"
 version = "0.1.0"
 description = "Optimized Lightweight LLM Architecture & Serving Stack for 36GB RAM Machines"
 readme = "README.md"

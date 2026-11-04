@@ -122,5 +122,5 @@ llama-server \
 
 ## 📜 Citation & Credits
 - Base Model: [Qwen2.5-Coder-14B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct) by the Qwen Team.
-- Optimization & Serving Pipeline: [ApexCode-36GB](https://github.com/nileshchakraborty/apex-code-36gb) by Nilesh Chakraborty.
+- Optimization & Serving Pipeline: [ApexCode-14B-Instruct](https://github.com/nileshchakraborty/apex-code-14b-instruct) by Nilesh Chakraborty.
 - License: MIT.

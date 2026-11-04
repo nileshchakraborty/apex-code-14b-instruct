@@ -69,8 +69,8 @@
 
 ### 1. Automated Environment Setup
 ```bash
-git clone https://github.com/nileshchakraborty/apex-code-36gb.git
-cd apex-code-36gb
+git clone https://github.com/nileshchakraborty/apex-code-14b-instruct.git
+cd apex-code-14b-instruct
 bash scripts/setup_environment.sh
 ```
 
