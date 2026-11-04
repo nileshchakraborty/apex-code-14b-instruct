@@ -124,6 +124,17 @@ def publish(
             commit_message="docs: add 76.0% Pass@1 clean decoding pipeline LiveCodeBench results",
         )
 
+    lcb_50p_path = "./tests/lcb_benchmark_results_50p_unified.json"
+    if os.path.isfile(lcb_50p_path):
+        print("📊 Uploading Verified 50-Problem Scaled LiveCodeBench (62% Pass@1) Results...")
+        api.upload_file(
+            path_or_fileobj=lcb_50p_path,
+            path_in_repo="lcb_benchmark_results_50p_unified.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add 62.0% Pass@1 scaled 50-problem LiveCodeBench results",
+        )
+
     # Step 4: Scan and upload model weights (.gguf / .safetensors)
     if not os.path.isdir(model_dir):
         print(f"⚠️ Model directory '{model_dir}' does not exist.")

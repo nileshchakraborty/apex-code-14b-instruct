@@ -19,6 +19,7 @@ from lcb_runner.utils.extraction_utils import extract_code
 from lcb_runner.lm_styles import LMStyle
 from scripts.deepcoder_pipeline import query_ollama, extract_code_block, CODE_MODEL
 from scripts.clean_decoding_pipeline import generate_clean_solution
+from scripts.unified_research_pipeline import generate_optimized_solution
 
 
 def main():
@@ -29,16 +30,16 @@ def main():
     parser.add_argument(
         "--pipeline",
         type=str,
-        default="clean",
-        choices=["standard", "clean", "contracts"],
-        help="Inference pipeline architecture (default: clean)",
+        default="unified",
+        choices=["standard", "clean", "contracts", "unified"],
+        help="Inference pipeline architecture (default: unified)",
     )
     parser.add_argument(
         "--mode",
         type=str,
         default="greedy",
-        choices=["greedy", "calibrated"],
-        help="Decoding mode for clean pipeline (default: greedy)",
+        choices=["greedy", "consensus", "calibrated"],
+        help="Decoding mode (default: greedy)",
     )
     args = parser.parse_args()
 
@@ -62,7 +63,17 @@ def main():
     for idx, prob in enumerate(test_slice, 1):
         print(f"[{idx}/{len(test_slice)}] {prob.question_id}: {prob.question_title} ({prob.difficulty.value})")
 
-        if args.pipeline in ("clean", "contracts"):
+        if args.pipeline == "unified":
+            res = generate_optimized_solution(
+                problem_text=prob.question_content,
+                starter_code=prob.starter_code,
+                mode=args.mode,
+                is_competitive_io=True,
+            )
+            code = res.get("code", "")
+            latency = res.get("latency_sec", 0.0)
+            tokens = res.get("tokens", 0)
+        elif args.pipeline in ("clean", "contracts"):
             res = generate_clean_solution(
                 problem_text=prob.question_content,
                 starter_code=prob.starter_code,
