@@ -20,13 +20,13 @@ try:
     from scripts.invariant_induction_pipeline import extract_problem_invariants, synthesize_grounded_code
     from scripts.ast_contract_compiler import audit_semantic_bugs, verify_contract_coverage
     from scripts.ast_consensus_voter import select_consensus_candidate, compute_canonical_ast_hash
-    from scripts.clean_decoding_pipeline import generate_clean_solution, CODE_MODEL
+    from scripts.clean_decoding_pipeline import generate_clean_solution, query_calibrated_model, extract_python_code, CODE_MODEL
     from scripts.distinguishing_input_arbiter import arbitrate_candidates
 except ImportError:
     from invariant_induction_pipeline import extract_problem_invariants, synthesize_grounded_code
     from ast_contract_compiler import audit_semantic_bugs, verify_contract_coverage
     from ast_consensus_voter import select_consensus_candidate, compute_canonical_ast_hash
-    from clean_decoding_pipeline import generate_clean_solution, CODE_MODEL
+    from clean_decoding_pipeline import generate_clean_solution, query_calibrated_model, extract_python_code, CODE_MODEL
     from distinguishing_input_arbiter import arbitrate_candidates
 
 
@@ -89,22 +89,31 @@ def generate_optimized_solution(
                     "diverged": False,
                 }
             else:
-                # Linter detected a flaw; trigger System 2 Invariant Induction
-                p1_res = extract_problem_invariants(problem_text=problem_text, starter_code=starter_code, model=model)
-                invariants = p1_res.get("analysis", "")
-                tokens_used += p1_res.get("tokens", 0)
-
-                res_b = synthesize_grounded_code(
-                    problem_text=problem_text,
-                    invariants=invariants,
-                    starter_code=starter_code,
-                    repo_context=repo_context,
+                # External Deterministic Tool Call: linter detected a flaw; trigger Karpathy-style Tool-Feedback Repair
+                tool_feedback = (
+                    "EXTERNAL TOOL EXECUTION RESULT: `ast_semantic_linter`\n"
+                    "STATUS: FLAW DETECTED IN INITIAL IMPLEMENTATION\n"
+                    "VIOLATIONS:\n" + "\n".join(f"- {b}" for b in audit_a["bugs"]) + "\n\n"
+                    "REPAIR INVARIANT:\n"
+                    "Address the exact tool violation above. Ensure exact parity and boundary invariants "
+                    "(e.g., if negative count is odd, drop the largest negative closest to 0; handle empty/single/zero elements properly)."
+                )
+                repair_prompt = (
+                    f"PROBLEM SPECIFICATION:\n{problem_text}\n\n"
+                    + (f"STARTER CODE:\n{starter_code}\n\n" if starter_code else "")
+                    + f"INITIAL CODE:\n```python\n{code_a}\n```\n\n"
+                    f"{tool_feedback}\n\n"
+                    "TASK: Write the complete corrected Python code inside a ```python block."
+                )
+                repair_res = query_calibrated_model(
+                    prompt=repair_prompt,
+                    system_prompt="You are an expert algorithms engineer. Fix the code by strictly adhering to the external tool linter report.",
                     mode="greedy",
                     model=model,
-                    is_competitive_io=is_competitive_io,
+                    max_tokens=600,
                 )
-                code_b = res_b["code"]
-                tokens_used += res_b.get("tokens", 0)
+                code_b = extract_python_code(repair_res["content"])
+                tokens_used += repair_res.get("tokens", 0)
 
                 arb_res = arbitrate_candidates(
                     problem_text=problem_text,
@@ -116,7 +125,7 @@ def generate_optimized_solution(
                 primary_code = arb_res["winner_code"]
                 consensus_strength = 1.0 if not arb_res.get("diverged", False) else 0.5
                 arbitration_meta = {
-                    "routing": "System 2 Fallback",
+                    "routing": "Tool-Call Linter Repair",
                     "winner_label": arb_res.get("winner_label"),
                     "reason": arb_res.get("reason"),
                     "diverged": arb_res.get("diverged", False),
