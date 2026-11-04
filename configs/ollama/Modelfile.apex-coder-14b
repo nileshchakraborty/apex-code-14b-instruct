@@ -1,7 +1,7 @@
 # ApexCode-14B Ollama Modelfile
 # Tuned for 36 GB Unified RAM Systems
 
-FROM qwen2.5-coder:14b-instruct-q5_K_M
+FROM qwen2.5-coder:14b
 
 # Configure context window & KV cache memory
 PARAMETER num_ctx 32768
