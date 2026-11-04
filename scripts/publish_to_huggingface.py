@@ -88,7 +88,18 @@ def publish(
             path_in_repo="end_to_end_test_results.json",
             repo_id=repo_id,
             repo_type="model",
-            commit_message="docs: add verified 5/5 end-to-end benchmark test results",
+            commit_message="docs: add verified end-to-end benchmark test results",
+        )
+
+    deepcoder_results_path = "./tests/deepcoder_benchmark_results.json"
+    if os.path.isfile(deepcoder_results_path):
+        print("📊 Uploading Verified 9-Problem DeepCoder Benchmark Results...")
+        api.upload_file(
+            path_or_fileobj=deepcoder_results_path,
+            path_in_repo="deepcoder_benchmark_results.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add verified 9/9 DeepCoder adaptive benchmark results",
         )
 
     # Step 4: Scan and upload model weights (.gguf / .safetensors)
