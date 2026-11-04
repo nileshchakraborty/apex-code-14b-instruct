@@ -32,6 +32,29 @@ download_hf_file() {
         return 0
     fi
 
+    # Check if weights exist in local Ollama blob store to avoid re-downloading
+    local OLLAMA_MANIFEST="$HOME/.ollama/models/manifests/registry.ollama.ai/library/qwen2.5-coder"
+    if [[ -d "$OLLAMA_MANIFEST" ]]; then
+        if [[ "$filename" == *"14b"* ]] && [[ -f "$OLLAMA_MANIFEST/14b" ]]; then
+            local BLOB_HASH=$(grep -o '"digest":"sha256:[^"]*"' "$OLLAMA_MANIFEST/14b" | head -1 | cut -d: -f2 | tr -d '"')
+            local BLOB_FILE="$HOME/.ollama/models/blobs/sha256-$BLOB_HASH"
+            if [[ -f "$BLOB_FILE" ]]; then
+                echo "⚡ Found local Ollama blob for 14B! Linking instantly without re-downloading..."
+                ln "$BLOB_FILE" "$dest"
+                return 0
+            fi
+        fi
+        if [[ "$filename" == *"0.5b"* ]] && [[ -f "$OLLAMA_MANIFEST/0.5b" ]]; then
+            local BLOB_HASH=$(grep -o '"digest":"sha256:[^"]*"' "$OLLAMA_MANIFEST/0.5b" | head -1 | cut -d: -f2 | tr -d '"')
+            local BLOB_FILE="$HOME/.ollama/models/blobs/sha256-$BLOB_HASH"
+            if [[ -f "$BLOB_FILE" ]]; then
+                echo "⚡ Found local Ollama blob for 0.5B! Linking instantly without re-downloading..."
+                ln "$BLOB_FILE" "$dest"
+                return 0
+            fi
+        fi
+    fi
+
     echo "⬇️ Downloading $filename from $repo..."
     if command -v huggingface-cli &> /dev/null; then
         huggingface-cli download "$repo" "$filename" --local-dir "$MODEL_DIR" --local-dir-use-symlinks False
