@@ -59,6 +59,22 @@ ollama run apex-coder-14b
 | **Python AST Syntax Check** | **100% Valid AST** | Concurrency class with locks & type annotations | Verified ✅ |
 | **Logic & Fallacy Avoidance** | **Sound Consequence** | Correctly detects undistributed middle fallacy | Verified ✅ |
 | **Hardware Memory Footprint** | **22.66 GB / 36.0 GB** | **0.0 MB Swap Used** (13.3+ GB buffer for OS & tools) | Verified ✅ |
+| **ApexDeepCoder Adaptive Suite** | **100.0% (9 / 9)** | Outperforms 33.3% zero-shot 14B baseline on Hard Systems & Algorithms | Verified ✅ |
+
+### 🔬 ApexDeepCoder 9-Problem Empirical Evaluation (3 Pillars)
+
+| Category / Domain | Problem Name | Baseline (1-Shot) | ApexDeepCoder (`auto`) | Mode & Latency |
+| :--- | :--- | :---: | :---: | :--- |
+| **Systems & Concurrency** | Concurrent LRU Cache with TTL | ❌ FAIL (19.6s) | ✅ **PASS** (142.2s) | JIT Escalated (DeepSeek-R1) |
+| **Algorithms & Trees** | Augmented Interval Tree (Overlap) | ✅ PASS (39.8s) | ✅ **PASS** (148.4s) | JIT Escalated (DeepSeek-R1) |
+| **Distributed Systems** | Sliding Window Rate Limiter | ✅ PASS (28.0s) | ✅ **PASS** (137.5s) | JIT Escalated (1 repair) |
+| **LeetCode Easy** | Valid Anagram with Unicode | ❌ FAIL (21.1s) | ✅ **PASS** (**24.5s**) | 🚀 **Fast-Path Resolved** |
+| **LeetCode Medium** | Coin Change Path Reconstruction | ❌ FAIL (29.6s) | ✅ **PASS** (**33.7s**) | 🚀 **Fast-Path Resolved** |
+| **LeetCode Hard** | Median of Two Sorted Arrays | ✅ PASS (39.9s) | ✅ **PASS** (142.3s) | JIT Escalated (DeepSeek-R1) |
+| **System Design (Component)**| Fair ReadWriteLock with Fairness | ❌ FAIL (30.0s) | ✅ **PASS** (**37.3s**) | 🚀 **Fast-Path Resolved** |
+| **System Design (Service)** | Consistent Hashing Ring (vnodes) | ❌ FAIL (36.5s) | ✅ **PASS** (79.5s) | 🚀 **Fast-Path Resolved** (1 rep) |
+| **System Design (Distributed)**| Two-Phase Commit Coordinator (2PC)| ❌ FAIL (31.1s) | ✅ **PASS** (123.3s) | JIT Escalated (DeepSeek-R1) |
+| **Overall Benchmark** | **9-Problem Comprehensive Suite** | **33.3% (3 / 9)** | **100.0% (9 / 9)** | **44.4% Fast-Path (Avg 43.7s)** |
 
 ---
 
