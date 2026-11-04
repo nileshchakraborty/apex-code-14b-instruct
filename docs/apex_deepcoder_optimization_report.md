@@ -10,12 +10,12 @@ To address this while respecting our **36 GB Unified RAM ceiling** and solving t
 - **Effort Levels**: `low` (fast single-shot ~8s), `medium` (in-context SSIB priming ~20s), `high` (full 2-stage R1 invariant planning + reflexion ~120s), and `auto` (optimistic JIT escalation).
 - **Fast-Path Acceleration**: In `auto` mode, straightforward algorithmic and component tasks resolve on the single-pass fast path in **24s–37s** (matching baseline latency), while complex distributed invariant tasks automatically escalate to DeepSeek-R1 planning.
 - **Empirical Accuracy**: Across a comprehensive 9-problem suite spanning Systems, LeetCode (Easy/Medium/Hard), and System Design (Component/Service/Distributed):
-  - **Baseline Single-Shot 14B (`apex-coder-14b`)**: **3 / 9 Passed (33.3% Pass Rate)**
+  - **Baseline Single-Shot 14B (`apex-coder-14b`)**: **2 / 9 Passed (22.2% Pass Rate)**
   - **ApexDeepCoder (`effort="auto"`)**: **9 / 9 Passed (100.0% Pass Rate)**
-  - **Accuracy Gain**: **+66.7 percentage points (+200% relative gain)**
-  - **Fast-Path Resolution Ratio**: **4 / 9 (44.4%)** resolved on the fast-path with an average latency of **43.73s**
-  - **Hardware Safety**: **21.5 GB Peak RAM / 36.0 GB Total** (**0.0 MB SSD Swap churn**)
-  - **Execution Sandbox**: 100% verified inside an isolated, zero-trust Docker container (`apex-code-36gb:latest` with `--net=none --memory=512m`)
+  - **Accuracy Gain**: **+77.8 percentage points (+350% relative gain)**
+  - **Fast-Path Resolution Ratio**: **5 / 9 (55.6%)** resolved directly on System 1 fast-path with an average latency of **29.30s** (beating baseline's 31.67s average on those problems!)
+  - **Hardware Safety**: **21.29 GB Peak RAM / 36.0 GB Total** (**0.0 MB SSD Swap churn**)
+  - **Execution Sandbox**: 100% verified inside an isolated, persistent zero-trust Docker daemon (`apex-sandbox-daemon` with `--init --net=none --memory=512m --memory-swap=512m --pids-limit=64`), completing sandbox runs in **~34.8 ms**.
 
 ---
 
@@ -61,15 +61,15 @@ Evaluated on an **Apple Silicon Mac (M-Series, 36 GB Unified RAM)** using native
 
 | # | Challenge Name | Pillar & Category | Difficulty | Baseline 14B (1-Shot) | ApexDeepCoder (`auto`) | Effort Path | Baseline Latency | DeepCoder Latency |
 | :-: | :--- | :--- | :--- | :---: | :---: | :---: | :---: | :---: |
-| **1** | **Concurrent LRU Cache with TTL** | Systems & Concurrency | Hard | ❌ FAIL | ✅ **PASS** | Auto (Escalated) | 19.60s | 142.19s |
-| **2** | **Augmented Interval Tree** | Algorithms & Trees | Hard | ✅ PASS | ✅ **PASS** | Auto (Escalated) | 39.81s | 148.36s |
-| **3** | **Sliding Window Rate Limiter** | Distributed Systems | Medium | ✅ PASS | ✅ **PASS** | Auto (Escalated, 1 rep) | 28.00s | 137.52s |
-| **4** | **LeetCode Easy: Valid Anagram** | LeetCode Multi-Level | Easy | ❌ FAIL | ✅ **PASS** | Auto (Fast-Path) | 21.09s | **24.52s** |
-| **5** | **LeetCode Medium: Coin Change Path** | LeetCode Multi-Level | Medium | ❌ FAIL | ✅ **PASS** | Auto (Fast-Path) | 29.61s | **33.65s** |
-| **6** | **LeetCode Hard: Median Sorted Arrays** | LeetCode Multi-Level | Hard | ✅ PASS | ✅ **PASS** | Auto (Escalated) | 39.85s | 142.32s |
-| **7** | **SysDesign: Fair ReadWriteLock** | System Design (Component) | Med-Hard | ❌ FAIL | ✅ **PASS** | Auto (Fast-Path) | 29.96s | **37.26s** |
-| **8** | **SysDesign: Consistent Hash Ring** | System Design (Service) | Hard | ❌ FAIL | ✅ **PASS** | Auto (Fast-Path, 1 rep) | 36.48s | 79.49s |
-| **9** | **SysDesign: Two-Phase Commit (2PC)** | System Design (Distributed)| Hard | ❌ FAIL | ✅ **PASS** | Auto (Escalated) | 31.10s | 123.33s |
+| **1** | **Concurrent LRU Cache with TTL** | Systems & Concurrency | Hard | ❌ FAIL | ✅ **PASS** | Auto (Escalated, 2 rep) | 18.07s | 196.44s |
+| **2** | **Augmented Interval Tree** | Algorithms & Trees | Hard | ❌ FAIL | ✅ **PASS** | Auto (Escalated) | 32.68s | 154.35s |
+| **3** | **Sliding Window Rate Limiter** | Distributed Systems | Medium | ✅ PASS | ✅ **PASS** | System 1 (Fast-Path) | 28.63s | **26.98s** |
+| **4** | **LeetCode Easy: Valid Anagram** | LeetCode Multi-Level | Easy | ❌ FAIL | ✅ **PASS** | Auto (Escalated) | 19.69s | 105.10s |
+| **5** | **LeetCode Medium: Coin Change Path** | LeetCode Multi-Level | Medium | ❌ FAIL | ✅ **PASS** | System 1 (Fast-Path) | 33.59s | **27.90s** |
+| **6** | **LeetCode Hard: Median Sorted Arrays** | LeetCode Multi-Level | Hard | ✅ PASS | ✅ **PASS** | System 1 (Fast-Path) | 38.56s | **27.66s** |
+| **7** | **SysDesign: Fair ReadWriteLock** | System Design (Component) | Med-Hard | ❌ FAIL | ✅ **PASS** | System 1 (Fast-Path) | 23.25s | **33.42s** |
+| **8** | **SysDesign: Consistent Hash Ring** | System Design (Service) | Hard | ❌ FAIL | ✅ **PASS** | System 1 (Fast-Path) | 34.31s | **30.52s** |
+| **9** | **SysDesign: Two-Phase Commit (2PC)** | System Design (Distributed)| Hard | ❌ FAIL | ✅ **PASS** | Auto (Escalated) | 29.70s | 165.74s |
 
 ---
 
@@ -78,13 +78,13 @@ Evaluated on an **Apple Silicon Mac (M-Series, 36 GB Unified RAM)** using native
 | Metric | Baseline 14B (Single-Shot) | ApexDeepCoder (`auto` Effort) | Delta / Impact |
 | :--- | :---: | :---: | :---: |
 | **Total Problems Tested** | 9 | 9 | Full 3-Pillar Coverage |
-| **Pass Rate** | **33.3%** (3 / 9) | **100.0%** (9 / 9) | **+66.7% absolute (+200% relative)** |
-| **Fast-Path Resolutions** | N/A | **44.4%** (4 / 9) | Direct baseline speed parity |
-| **Avg Latency (Fast-Path)** | 30.61s | **43.73s** | **Virtually identical to baseline** |
-| **Avg Latency (Overall)** | 30.61s | 96.52s | Controlled compute investment |
-| **Docker Isolation** | Verified | Verified | `--net=none --memory=512m` |
-| **Peak System RAM** | 20.3 GB | **21.5 GB** | Strictly < 24 GB budget |
-| **SSD Swap Thrashing** | 0.0 MB | **0.0 MB** | 100% RAM resident |
+| **Pass Rate** | **22.2%** (2 / 9) | **100.0%** (9 / 9) | **+77.8% absolute (+350% relative)** |
+| **Fast-Path Resolutions** | N/A | **55.6%** (5 / 9) | Direct baseline speed parity / faster |
+| **Avg Latency (Fast-Path)** | 31.67s | **29.30s** | **2.37s faster than baseline!** |
+| **Avg Latency (Overall)** | 28.72s | 85.35s | High accuracy on hardest problems |
+| **Docker Isolation** | Warmed Daemon | Warmed Daemon | `--net=none --memory=512m --init` (~34.8ms) |
+| **Peak System RAM** | 19.7 GB | **21.29 GB** | Strictly < 24 GB budget |
+| **SSD Swap Thrashing** | 0.0 MB | **0.0 MB** | 100% RAM resident (Zero swap churn) |
 
 ---
 

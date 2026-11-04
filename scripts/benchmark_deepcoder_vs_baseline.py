@@ -207,7 +207,7 @@ def run_single_shot_baseline(prompt: str) -> dict:
         num_ctx=16384,
     )
     extracted = extract_code_block(res["content"])
-    exec_res = verify_and_execute_code(extracted, timeout_sec=15, use_docker=True)
+    exec_res = verify_and_execute_code(extracted, timeout_sec=15)
     total_time = round(time.perf_counter() - t0, 2)
 
     return {
@@ -295,9 +295,9 @@ def run_benchmark(
 
         if deepcoder_res["tests_passed"]:
             results["summary"]["deepcoder_pass_count"] += 1
-        if "fast-path" in effort_used:
+        if "system1" in effort_used or "fast-path" in effort_used:
             results["summary"]["fast_path_resolved_count"] += 1
-        elif "escalated" in effort_used:
+        elif "system2" in effort_used or "escalated" in effort_used:
             results["summary"]["escalated_count"] += 1
 
         results["summary"]["deepcoder_latencies"].append(deepcoder_res["latency_sec"]["total"])
@@ -351,7 +351,7 @@ def run_benchmark(
         else:
             b_txt = "SKIPPED"
         d = p["deepcoder"]
-        d_mode = "fast" if "fast-path" in d["effort_level"] else ("esc" if "escalated" in d["effort_level"] else d["effort_level"])
+        d_mode = "sys1" if "system1" in d["effort_level"] else ("sys2" if "system2" in d["effort_level"] else ("esc" if "escalated" in d["effort_level"] else d["effort_level"]))
         d_txt = f"{'✅ PASS' if d['passed'] else '❌ FAIL'} ({d['latency_sec']}s, {d_mode})"
         print(f"{p['name'][:34]:<34} | {b_txt:<18} | {d_txt:<26}")
     print("-" * 84)

@@ -1,30 +1,37 @@
 #!/usr/bin/env python3
-"""2-Stage Cognitive Decomposition & Reflexion Pipeline (ApexDeepCoder).
+"""Adaptive Invariant Pipeline (ApexDeepCoder) with Pure Warmed Docker Sandbox.
 
-Production-grade implementation featuring:
-1. Stage 1: SSIB (Structured Semantic Invariant Block) via ApexThink-14B (DeepSeek-R1-14B)
-2. Stage 2: Dual-Track Brute-Force Oracle Property Synthesis via ApexCode-14B (Qwen2.5-Coder-14B)
-3. Stage 3: ACI (Agent-Computer Interface) Diagnostic Frame with 2-Tier AST Patch Escalation
-4. Zero-Trust Sandboxed Execution via Docker Container with strict memory/CPU caps
-5. Context-Adaptive KV-Cache Governance (4k Stage 1, 16k Stage 2)
+Features:
+1. System 1: Invariant-Primed Fast Path using Generalized Archetype Taxonomy (~20-30s)
+2. System 2: 2-Stage SSIB Decomposition via ApexThink-14B (DeepSeek-R1) (~60-90s)
+3. Zero-Latency Complexity Gating: Routes known archetypes to System 1, novel logic to System 2
+4. Pure Warmed Docker Sandbox Daemon: Persistent container running with --net=none, --memory=512m,
+   ephemeral /tmp/run_<uuid> workdir, and tini process reaping (~35ms per execution)
+5. ACI (Agent-Computer Interface) Diagnostic Frame with Synthetic Deadlock & OOM handling
+6. Dual-Track Reference Oracle Property Synthesis
 """
 
 import ast
 import json
 import os
 import re
-import resource
-import subprocess
 import sys
-import tempfile
 import time
 import urllib.request
 import psutil
 
+# Add scripts directory to path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from sandbox_daemon import execute_in_sandbox, ensure_daemon_running
+from invariant_registry import (
+    classify_archetype,
+    generate_synthetic_diagnostic_frame,
+    wrap_code_with_auto_test_runner,
+)
+
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
 THINK_MODEL = os.environ.get("THINK_MODEL", "apex-think-14b")
 CODE_MODEL = os.environ.get("CODE_MODEL", "apex-coder-14b")
-DOCKER_IMAGE = os.environ.get("DOCKER_IMAGE", "apex-code-36gb:latest")
 
 
 def get_memory_usage() -> dict:
@@ -67,9 +74,11 @@ def query_ollama(
             data = json.loads(resp.read().decode("utf-8"))
             latency = time.perf_counter() - t0
             content = data.get("message", {}).get("content", "")
+            thinking = data.get("message", {}).get("thinking", "")
             tokens = data.get("eval_count", 0)
             return {
                 "content": content,
+                "thinking": thinking,
                 "tokens": tokens,
                 "latency_sec": round(latency, 2),
                 "error": None,
@@ -77,6 +86,7 @@ def query_ollama(
     except Exception as e:
         return {
             "content": "",
+            "thinking": "",
             "tokens": 0,
             "latency_sec": round(time.perf_counter() - t0, 2),
             "error": str(e),
@@ -135,8 +145,8 @@ def parse_aci_diagnostic_frame(stderr: str, code_str: str) -> dict:
     return frame
 
 
-def verify_and_execute_code(code_str: str, timeout_sec: int = 15, use_docker: bool = True) -> dict:
-    """Verify code using Python AST and execute in a sandboxed runtime (Docker or ulimit)."""
+def verify_and_execute_code(code_str: str, timeout_sec: int = 15) -> dict:
+    """Verify code using Python AST and execute inside the pure warmed Docker sandbox daemon."""
     # Step 1: AST Syntax Check
     try:
         ast.parse(code_str)
@@ -156,124 +166,47 @@ def verify_and_execute_code(code_str: str, timeout_sec: int = 15, use_docker: bo
             },
         }
 
-    # Step 2: Sandboxed Execution via Docker Container (Primary Route)
-    if use_docker:
-        try:
-            docker_cmd = [
-                "docker", "run", "--rm", "-i",
-                "--net=none",
-                "--memory=512m",
-                "--cpus=2.0",
-                "--pids-limit=64",
-                "--entrypoint", "python3",
-                DOCKER_IMAGE,
-                "-",
-            ]
-            res = subprocess.run(
-                docker_cmd,
-                input=code_str,
-                capture_output=True,
-                text=True,
-                timeout=timeout_sec,
+    # Step 2: Auto-wrap test harness if needed
+    executable_code = wrap_code_with_auto_test_runner(code_str)
+
+    # Step 3: Execute in pure warmed Docker sandbox daemon
+    sandbox_res = execute_in_sandbox(executable_code, timeout_sec=timeout_sec)
+    passed = sandbox_res["passed"]
+
+    aci_frame = None
+    if not passed:
+        fail_cat = sandbox_res.get("failure_category")
+        if fail_cat in ("DeadlockOrTimeout", "OutOfMemoryAllocation"):
+            aci_frame = generate_synthetic_diagnostic_frame(
+                fail_cat, sandbox_res["stderr"], code_str, exit_code=sandbox_res["exit_code"]
             )
-            passed = (res.returncode == 0)
-            aci_frame = None if passed else parse_aci_diagnostic_frame(res.stderr, code_str)
-            return {
-                "ast_valid": True,
-                "executed": True,
-                "passed": passed,
-                "sandbox": "docker",
-                "returncode": res.returncode,
-                "stdout": res.stdout,
-                "stderr": res.stderr,
-                "error": None if passed else f"Runtime error (exit code {res.returncode}):\n{res.stderr.strip()}",
-                "aci_frame": aci_frame,
-            }
-        except subprocess.TimeoutExpired:
-            return {
-                "ast_valid": True,
-                "executed": True,
-                "passed": False,
-                "sandbox": "docker",
-                "error": f"Execution timed out after {timeout_sec} seconds (possible deadlock or infinite loop)",
-                "aci_frame": {
-                    "status": "TIMEOUT",
-                    "failure_type": "TimeoutExpired",
-                    "exception_message": f"Execution exceeded {timeout_sec}s timeout boundary",
-                },
-            }
-        except Exception:
-            # Fall through to host subprocess with ulimit fallback
-            pass
+        else:
+            aci_frame = parse_aci_diagnostic_frame(sandbox_res["stderr"], code_str)
 
-    # Step 3: Fallback Sandboxed Local Subprocess Execution (with resource limits)
-    def set_resource_limits():
-        try:
-            # 1 GB virtual memory cap
-            resource.setrlimit(resource.RLIMIT_AS, (1024 * 1024 * 1024, 1024 * 1024 * 1024))
-        except Exception:
-            pass
-        try:
-            # 12 second CPU execution cap
-            resource.setrlimit(resource.RLIMIT_CPU, (timeout_sec + 2, timeout_sec + 4))
-        except Exception:
-            pass
-
-    with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False) as tmp:
-        tmp.write(code_str)
-        tmp_path = tmp.name
-
-    try:
-        res = subprocess.run(
-            [sys.executable, tmp_path],
-            capture_output=True,
-            text=True,
-            timeout=timeout_sec,
-            preexec_fn=set_resource_limits if os.name != "nt" else None,
-        )
-        passed = (res.returncode == 0)
-        aci_frame = None if passed else parse_aci_diagnostic_frame(res.stderr, code_str)
-        return {
-            "ast_valid": True,
-            "executed": True,
-            "passed": passed,
-            "sandbox": "host_subprocess_ulimit",
-            "returncode": res.returncode,
-            "stdout": res.stdout,
-            "stderr": res.stderr,
-            "error": None if passed else f"Runtime error (exit code {res.returncode}):\n{res.stderr.strip()}",
-            "aci_frame": aci_frame,
-        }
-    except subprocess.TimeoutExpired:
-        return {
-            "ast_valid": True,
-            "executed": True,
-            "passed": False,
-            "sandbox": "host_subprocess_ulimit",
-            "error": f"Execution timed out after {timeout_sec} seconds (possible deadlock or infinite loop)",
-            "aci_frame": {
-                "status": "TIMEOUT",
-                "failure_type": "TimeoutExpired",
-                "exception_message": f"Execution exceeded {timeout_sec}s timeout boundary",
-            },
-        }
-    finally:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
+    return {
+        "ast_valid": True,
+        "executed": True,
+        "passed": passed,
+        "sandbox": sandbox_res.get("sandbox", "warmed_docker_daemon"),
+        "returncode": sandbox_res["exit_code"],
+        "stdout": sandbox_res["stdout"],
+        "stderr": sandbox_res["stderr"],
+        "error": None if passed else f"Runtime error (exit code {sandbox_res['exit_code']}):\n{sandbox_res['stderr'].strip()}",
+        "aci_frame": aci_frame,
+        "execution_time_ms": sandbox_res.get("execution_time_ms", 0.0),
+    }
 
 
 class FunctionReplacer(ast.NodeTransformer):
-    """AST transformer that splices a single target FunctionDef with a new implementation."""
-    def __init__(self, target_func_name: str, new_func_node: ast.AST):
-        self.target_func_name = target_func_name
-        self.new_func_node = new_func_node
+    def __init__(self, target_name: str, new_node: ast.FunctionDef):
+        self.target_name = target_name
+        self.new_node = new_node
         self.replaced = False
 
     def visit_FunctionDef(self, node: ast.FunctionDef):
-        if node.name == self.target_func_name:
+        if node.name == self.target_name:
             self.replaced = True
-            return self.new_func_node
-        self.generic_visit(node)
+            return self.new_node
         return node
 
 
@@ -282,7 +215,6 @@ def patch_function_ast(original_code: str, target_func_name: str, new_func_code:
     tree = ast.parse(original_code)
     new_tree = ast.parse(new_func_code)
 
-    # Extract the new function node
     new_func_node = None
     for n in ast.walk(new_tree):
         if isinstance(n, ast.FunctionDef) and n.name == target_func_name:
@@ -321,7 +253,7 @@ def _run_effort_low(prompt: str, verbose: bool = True) -> dict:
         num_ctx=8192,
     )
     code = extract_code_block(res["content"])
-    exec_res = verify_and_execute_code(code, timeout_sec=15, use_docker=True)
+    exec_res = verify_and_execute_code(code, timeout_sec=15)
     total_latency = round(time.perf_counter() - t0, 2)
     mem_final = get_memory_usage()
 
@@ -336,7 +268,7 @@ def _run_effort_low(prompt: str, verbose: bool = True) -> dict:
         "final_code": code,
         "ast_valid": exec_res.get("ast_valid", False),
         "tests_passed": exec_res.get("passed", False),
-        "sandbox_used": exec_res.get("sandbox", "unknown"),
+        "sandbox_used": exec_res.get("sandbox", "warmed_docker_daemon"),
         "repairs_performed": 0,
         "repair_history": [],
         "latency_sec": {"stage1_plan": 0.0, "stage2_code": res["latency_sec"], "total": total_latency},
@@ -345,31 +277,37 @@ def _run_effort_low(prompt: str, verbose: bool = True) -> dict:
     }
 
 
-def _run_effort_medium(prompt: str, max_repair_attempts: int = 1, verbose: bool = True) -> dict:
-    """Medium Effort: Single-pass In-Context SSIB priming + Docker sandbox verification (~15-22s)."""
+def _run_system1_fast_path(
+    prompt: str,
+    archetype_id: str,
+    archetype_schema: str,
+    max_repair_attempts: int = 1,
+    verbose: bool = True,
+) -> dict:
+    """System 1: Invariant-Primed Single-Pass Synthesis with ApexCode-14B (~20-30s)."""
     t0 = time.perf_counter()
     mem_initial = get_memory_usage()
     if verbose:
-        print("\n🟡 [ApexDeepCoder] Running MEDIUM Effort Mode (In-Context SSIB Priming)...")
+        print(f"\n⚡ [ApexDeepCoder: System 1] Invariant Fast Path ({archetype_id})...")
 
     sys_prompt = (
-        "You are an elite principal algorithms engineer.\n"
-        "Before writing code, output a compact 4-line SSIB INVARIANT CONTRACT defining:\n"
-        "1. Core State Invariants & Boundary Truth Conditions\n"
-        "2. Left and Right Pruning rules (for trees/intervals)\n"
-        "3. Concurrency lock management ('with self._lock:')\n"
-        "4. Dynamic Reference Oracle Pattern for tests\n"
-        "Then implement the complete production class and self-contained executable oracle tests in a standard ```python block."
+        "You are an elite principal algorithms and systems engineer.\n"
+        "Implement clean, robust, type-annotated production Python code adhering strictly to the formal invariant contract.\n"
+        "Include self-contained executable unit tests with assert statements. "
+        "Keep test sleep timings <= 0.05s so execution finishes swiftly. "
+        "Output code strictly inside a standard ```python block."
     )
+    user_prompt = f"{prompt}\n\n{archetype_schema}"
+
     res = query_ollama(
         model=CODE_MODEL,
-        messages=[{"role": "system", "content": sys_prompt}, {"role": "user", "content": prompt}],
+        messages=[{"role": "system", "content": sys_prompt}, {"role": "user", "content": user_prompt}],
         temperature=0.2,
         max_tokens=2048,
-        num_ctx=8192,
+        num_ctx=16384,
     )
     code = extract_code_block(res["content"])
-    exec_res = verify_and_execute_code(code, timeout_sec=15, use_docker=True)
+    exec_res = verify_and_execute_code(code, timeout_sec=15)
     repair_count = 0
     repair_history = []
 
@@ -377,24 +315,28 @@ def _run_effort_medium(prompt: str, max_repair_attempts: int = 1, verbose: bool 
         repair_count += 1
         aci_frame = exec_res.get("aci_frame") or parse_aci_diagnostic_frame(exec_res.get("error", ""), code)
         if verbose:
-            print(f"  ⚠️ Medium Mode Repair Attempt {repair_count}: {aci_frame.get('exception_message')[:70]}...")
+            print(f"  ⚠️ System 1 ACI Repair Attempt {repair_count}: {aci_frame.get('exception_message')[:75]}...")
 
         repair_prompt = (
-            f"Your Python code failed verification with the following error:\n"
-            f"Line {aci_frame.get('failing_line_number')}: {aci_frame.get('failing_code_snippet')}\n"
-            f"Error: {aci_frame.get('exception_message')}\n\n"
+            f"Your Python code failed sandbox verification with the following ACI Diagnostic Frame:\n"
+            f"```json\n{json.dumps(aci_frame, indent=2)}\n```\n\n"
             f"CURRENT CODE:\n```python\n{code}\n```\n\n"
-            "Fix the root cause and return corrected code inside a ```python block."
+            "DIAGNOSTIC GUIDANCE:\n"
+            f"- Failing Line {aci_frame.get('failing_line_number')}: {aci_frame.get('failing_code_snippet')}\n"
+            f"- Error: {aci_frame.get('exception_message')}\n"
+            f"- Guidance: {aci_frame.get('remediation_guidance', 'Fix the root cause and ensure all unit tests pass.')}\n"
+            "- Include all necessary standard library imports.\n"
+            "Return the corrected self-contained Python code in a ```python block."
         )
         rep_res = query_ollama(
             model=CODE_MODEL,
-            messages=[{"role": "system", "content": "You are a code debugger. Fix the error."}, {"role": "user", "content": repair_prompt}],
+            messages=[{"role": "system", "content": "You are an expert debugger. Fix the code so all tests pass."}, {"role": "user", "content": repair_prompt}],
             temperature=0.1,
             max_tokens=2048,
-            num_ctx=8192,
+            num_ctx=16384,
         )
         code = extract_code_block(rep_res["content"])
-        exec_res = verify_and_execute_code(code, timeout_sec=15, use_docker=True)
+        exec_res = verify_and_execute_code(code, timeout_sec=15)
         repair_history.append({"attempt": repair_count, "aci_frame": aci_frame, "success": exec_res["passed"]})
 
     total_latency = round(time.perf_counter() - t0, 2)
@@ -402,16 +344,16 @@ def _run_effort_medium(prompt: str, max_repair_attempts: int = 1, verbose: bool 
 
     if verbose:
         status_tag = "✅ PASSED" if exec_res["passed"] else "❌ FAILED"
-        print(f"  {status_tag}: Medium Effort Finished in {total_latency}s ({res['tokens']} tokens).")
+        print(f"  {status_tag}: System 1 Finished in {total_latency}s (Repairs: {repair_count}, Tokens: {res['tokens']}).")
 
     return {
         "prompt": prompt,
-        "effort_level": "medium",
-        "plan": "In-Context SSIB Header",
+        "effort_level": f"system1 ({archetype_id})",
+        "plan": archetype_schema,
         "final_code": code,
         "ast_valid": exec_res.get("ast_valid", False),
         "tests_passed": exec_res.get("passed", False),
-        "sandbox_used": exec_res.get("sandbox", "unknown"),
+        "sandbox_used": exec_res.get("sandbox", "warmed_docker_daemon"),
         "repairs_performed": repair_count,
         "repair_history": repair_history,
         "latency_sec": {"stage1_plan": 0.0, "stage2_code": res["latency_sec"], "total": total_latency},
@@ -421,27 +363,21 @@ def _run_effort_medium(prompt: str, max_repair_attempts: int = 1, verbose: bool 
 
 
 def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = True) -> dict:
-    """High Effort: Full 2-Stage SSIB Invariants (ApexThink-14B) + Oracle Code (ApexCode-14B) + Reflexion (~45-65s)."""
+    """High Effort / System 2: Full 2-Stage SSIB Invariants (ApexThink-14B) + Oracle Code (ApexCode-14B) + Reflexion (~60-90s)."""
     pipeline_start = time.perf_counter()
     mem_initial = get_memory_usage()
 
     if verbose:
-        print("\n🔴 [ApexDeepCoder] Running HIGH Effort Mode (Full 2-Stage Invariant Decomposition)...")
+        print("\n🔴 [ApexDeepCoder: System 2] Full 2-Stage Invariant Decomposition (DeepSeek-R1)...")
 
-    # STAGE 1: SSIB Invariant Planning (ApexThink-14B, num_ctx: 4096)
+    # STAGE 1: SSIB Invariant Planning (ApexThink-14B)
     stage1_sys = (
         "You are an expert algorithms and systems architect. "
         "Analyze the programming task and produce a machine-readable STRUCTURED SEMANTIC INVARIANT BLOCK (SSIB):\n"
-        "1. FORMAL_PREDICATES:\n"
-        "   - Express all overlap, traversal, and pruning checks as exact boolean lambda expressions with standard math operators (<=, >=, <, >).\n"
-        "   - For binary search trees with intervals: explicitly state the Left Pruning and Right Pruning rules.\n"
-        "     * Left Prune: node.left is not None and node.left.max_high >= query.low\n"
-        "     * Right Prune: node.right is not None and node.interval.low <= query.high\n"
-        "2. BOUNDARY_TRUTH_TABLE:\n"
-        "   - Define explicit expected outcomes for point intervals [x, x], endpoint touching [a, b] & [b, c], and disjoint sets.\n"
-        "3. CONCURRENCY_INVARIANTS:\n"
-        "   - State the lock hierarchy using Python context managers ('with self._lock:').\n"
-        "Do NOT write the entire implementation here; focus strictly on mathematical contracts and invariants."
+        "1. FORMAL_PREDICATES: Express all overlap, traversal, and pruning checks as exact boolean lambda expressions (<=, >=, <, >).\n"
+        "2. BOUNDARY_TRUTH_TABLE: Define explicit expected outcomes for boundary conditions.\n"
+        "3. CONCURRENCY_INVARIANTS: State lock hierarchy using Python context managers ('with self._lock:').\n"
+        "Do NOT write the entire code here; focus strictly on mathematical contracts and invariants."
     )
     stage1_res = query_ollama(
         model=THINK_MODEL,
@@ -450,23 +386,18 @@ def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = 
         max_tokens=896,
         num_ctx=4096,
     )
-    plan_content = stage1_res["content"]
+    plan_content = stage1_res["content"] or stage1_res["thinking"]
     if verbose:
         print(f"  ✅ Stage 1 SSIB Contract established in {stage1_res['latency_sec']}s ({stage1_res['tokens']} tokens).")
 
     # STAGE 2: Code Synthesis with Reference Oracle Verification
     stage2_sys = (
-        "You are an elite principal software engineer. Implement the solution adhering strictly "
-        "to the SSIB Invariant Contract.\n"
+        "You are an elite principal software engineer. Implement the solution adhering strictly to the SSIB Invariant Contract.\n"
         "REQUIREMENTS:\n"
         "- Clean, production-ready Python with full type annotations and docstrings.\n"
-        "- Thread safety using 'with self._lock:' context managers (never manual acquire/release).\n"
-        "- DUAL-TRACK ORACLE VERIFICATION IN TESTS:\n"
-        "  When testing data structures (e.g. interval tree, LRU, rate limiter), DO NOT rely on manual handwritten expected sets.\n"
-        "  Instead, implement a simple, ground-truth O(N) brute-force linear filter or property-based invariant oracle to dynamically verify results.\n"
-        "  For intervals: def oracle(intervals, q_low, q_high): return set(iv for iv in intervals if iv[0] <= q_high and iv[1] >= q_low)\n"
-        "  For LRU cache tests: remember that a cache of capacity K holds K items! It only evicts when inserting item K+1. (e.g. if max_size=2, putting 'a','b','c' evicts 'a' and retains 'b','c'). Never assert eviction before capacity is strictly exceeded!\n"
-        "  For rate limiters: use sub-second intervals (e.g. window_seconds=0.05, sleep=0.06) so all tests execute swiftly in under 1 second.\n"
+        "- Thread safety using 'with self._lock:' context managers.\n"
+        "- In tests, implement dynamic brute-force reference oracles where applicable.\n"
+        "- In tests, keep sleep timings <= 0.05s so execution finishes swiftly.\n"
         "Return the code inside a standard ```python block."
     )
     stage2_prompt = (
@@ -486,8 +417,8 @@ def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = 
     if verbose:
         print(f"  ✅ Stage 2 Code generated in {stage2_res['latency_sec']}s ({stage2_res['tokens']} tokens).")
 
-    # STAGE 3: Zero-Trust Sandboxed Verification (Docker) + 2-Tier Reflexion
-    exec_result = verify_and_execute_code(extracted_code, timeout_sec=15, use_docker=True)
+    # STAGE 3: Zero-Trust Sandboxed Verification (Warmed Docker Daemon) + 2-Tier Reflexion
+    exec_result = verify_and_execute_code(extracted_code, timeout_sec=15)
     repair_count = 0
     repair_history = []
 
@@ -501,11 +432,10 @@ def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = 
             print(f"     Type: {aci_frame.get('failure_type')} | Function: {failing_func} | Line: {aci_frame.get('failing_line_number')}")
             print(f"     Message: {aci_frame.get('exception_message')[:90]}...")
 
-        # TIER 1: Surgical Single-Function AST Patching (for business logic methods)
+        # TIER 1: Surgical Single-Function AST Patching (for verified functions)
         tier1_succeeded = False
         is_test_function = failing_func and (failing_func.startswith("test") or failing_func in ("main", "<module>"))
 
-        # Verify failing_func is an actual function in the AST and not a module-level error
         is_actual_function = False
         if failing_func and not is_test_function and failing_func not in ("__init__",):
             try:
@@ -540,7 +470,7 @@ def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = 
             new_func_code = extract_code_block(patch_res["content"])
             try:
                 patched_code = patch_function_ast(extracted_code, failing_func, new_func_code)
-                test_run = verify_and_execute_code(patched_code, timeout_sec=15, use_docker=True)
+                test_run = verify_and_execute_code(patched_code, timeout_sec=15)
                 if test_run["passed"]:
                     extracted_code = patched_code
                     exec_result = test_run
@@ -563,9 +493,8 @@ def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = 
                 "DIAGNOSTIC GUIDANCE:\n"
                 f"- Failing Line {aci_frame.get('failing_line_number')}: {aci_frame.get('failing_code_snippet')}\n"
                 f"- Error: {aci_frame.get('exception_message')}\n"
-                "- Include all required standard library imports at top (e.g. `from typing import Dict, List, Optional, Tuple, Any, Set`; `import threading, time, bisect, hashlib`).\n"
-                "- If an assertion failed in unit tests, check whether the class implementation had a bug OR if the test assertion made an arithmetic or protocol assumption error.\n"
-                "- Ensure all method signatures match the specification.\n"
+                f"- Guidance: {aci_frame.get('remediation_guidance', 'Fix the root cause and ensure all unit tests pass.')}\n"
+                "- Include all required standard library imports at top (e.g. from typing import Dict, List, Optional, Tuple, Any).\n"
                 "- Ensure both the class logic and the self-contained test assertions pass 100%.\n"
                 "Return the complete corrected self-contained Python code in a ```python block."
             )
@@ -577,25 +506,25 @@ def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = 
                 num_ctx=16384,
             )
             extracted_code = extract_code_block(repair_res["content"])
-            exec_result = verify_and_execute_code(extracted_code, timeout_sec=15, use_docker=True)
+            exec_result = verify_and_execute_code(extracted_code, timeout_sec=15)
 
         repair_history.append({"attempt": repair_count, "tier": 1 if tier1_succeeded else 2, "aci_frame": aci_frame, "success": exec_result["passed"]})
 
     if verbose:
         status_tag = "✅ PASSED" if exec_result["passed"] else "❌ FAILED"
-        print(f"  {status_tag}: High Effort Complete (Passed: {exec_result['passed']}, Repairs: {repair_count}, Sandbox: {exec_result.get('sandbox')})")
+        print(f"  {status_tag}: System 2 Complete (Passed: {exec_result['passed']}, Repairs: {repair_count}, Sandbox: {exec_result.get('sandbox')})")
 
     total_latency = round(time.perf_counter() - pipeline_start, 2)
     mem_final = get_memory_usage()
 
     return {
         "prompt": prompt,
-        "effort_level": "high",
+        "effort_level": "system2 (r1_decomposed)",
         "plan": plan_content,
         "final_code": extracted_code,
         "ast_valid": exec_result.get("ast_valid", False),
         "tests_passed": exec_result.get("passed", False),
-        "sandbox_used": exec_result.get("sandbox", "unknown"),
+        "sandbox_used": exec_result.get("sandbox", "warmed_docker_daemon"),
         "repairs_performed": repair_count,
         "repair_history": repair_history,
         "latency_sec": {"stage1_plan": stage1_res["latency_sec"], "stage2_code": stage2_res["latency_sec"], "total": total_latency},
@@ -610,33 +539,36 @@ def run_deepcoder_pipeline(
     max_repair_attempts: int = 2,
     verbose: bool = True,
 ) -> dict:
-    """Run ApexDeepCoder pipeline with configurable reasoning_effort ('low', 'medium', 'high', 'auto')."""
+    """Run ApexDeepCoder with calibrated System 1 / System 2 complexity routing."""
     effort = reasoning_effort.lower().strip()
+
     if effort == "low":
         return _run_effort_low(prompt, verbose=verbose)
-    elif effort == "medium":
-        return _run_effort_medium(prompt, max_repair_attempts=1, verbose=verbose)
     elif effort == "high":
         return _run_effort_high(prompt, max_repair_attempts=max_repair_attempts, verbose=verbose)
-    else:  # "auto" - Optimistic JIT Escalation
+
+    # Auto Mode: Zero-Latency Archetype Complexity Gating
+    arch_id, arch_schema = classify_archetype(prompt)
+    if arch_id is not None:
         if verbose:
-            print("\n⚡ [ApexDeepCoder: Auto Effort] Starting Optimistic Fast-Path (Medium)...")
-        med_res = _run_effort_medium(prompt, max_repair_attempts=1, verbose=verbose)
-        if med_res["tests_passed"]:
-            if verbose:
-                print(f"🚀 [ApexDeepCoder: Auto Effort] Fast-Path SUCCEEDED in {med_res['latency_sec']['total']}s! Returning immediately.")
-            med_res["effort_level"] = "auto (fast-path resolved)"
-            return med_res
+            print(f"\n🎯 [Complexity Gating] Matched Archetype '{arch_id}' -> Routing to System 1 Fast Path.")
+        sys1_res = _run_system1_fast_path(prompt, arch_id, arch_schema, max_repair_attempts=1, verbose=verbose)
+        if sys1_res["tests_passed"]:
+            return sys1_res
 
         if verbose:
-            print(f"⚠️ [ApexDeepCoder: Auto Effort] Fast-Path encountered test failure. JIT Escalating to High Effort (R1 Invariants)...")
-        high_res = _run_effort_high(prompt, max_repair_attempts=max_repair_attempts, verbose=verbose)
-        high_res["effort_level"] = "auto (escalated to high)"
-        # Combine metrics
-        high_res["tokens_generated"] += med_res["tokens_generated"]
-        high_res["latency_sec"]["fast_path_attempt"] = med_res["latency_sec"]["total"]
-        high_res["latency_sec"]["total"] = round(high_res["latency_sec"]["total"] + med_res["latency_sec"]["total"], 2)
-        return high_res
+            print(f"⚠️ [Complexity Gating] System 1 encountered unresolved failure. JIT Escalating to System 2 (R1 Invariants)...")
+        sys2_res = _run_effort_high(prompt, max_repair_attempts=max_repair_attempts, verbose=verbose)
+        sys2_res["effort_level"] = f"auto (escalated from {arch_id})"
+        sys2_res["tokens_generated"] += sys1_res["tokens_generated"]
+        sys2_res["latency_sec"]["fast_path_attempt"] = sys1_res["latency_sec"]["total"]
+        sys2_res["latency_sec"]["total"] = round(sys2_res["latency_sec"]["total"] + sys1_res["latency_sec"]["total"], 2)
+        return sys2_res
+
+    # Unmapped / Novel logic: Route directly to System 2 without wasted fast-path retry
+    if verbose:
+        print(f"\n🧠 [Complexity Gating] Unmapped / Novel Domain -> Routing directly to System 2 (DeepSeek-R1).")
+    return _run_effort_high(prompt, max_repair_attempts=max_repair_attempts, verbose=verbose)
 
 
 def main():
@@ -648,7 +580,7 @@ def main():
     )
     res = run_deepcoder_pipeline(test_prompt)
     print("\n" + "=" * 68)
-    print(f"RESULT: {'PASS' if res['tests_passed'] else 'FAIL'}")
+    print(f"RESULT: {'PASS' if res['tests_passed'] else 'FAIL'} [Effort: {res['effort_level']}]")
     print(f"Sandbox: {res['sandbox_used']} | Latency: {res['latency_sec']['total']}s")
     print(f"RAM Used: {res['memory']['final_ram_gb']} GB (Swap: {res['memory']['swap_used_mb']} MB)")
     print("=" * 68)

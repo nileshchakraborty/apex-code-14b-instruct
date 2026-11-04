@@ -1,9 +1,10 @@
 {
-  "timestamp": "2026-11-04T04:08:35Z",
+  "timestamp": "2026-11-04T05:15:22Z",
   "reasoning_effort": "auto",
   "hardware": {
-    "total_ram_gb": 36.0,
-    "used_ram_gb": 21.5,
+    "used_gb": 19.7,
+    "total_gb": 36.0,
+    "percent": 73.2,
     "swap_used_mb": 648.38
   },
   "problems": [
@@ -12,21 +13,21 @@
       "name": "Concurrent LRU Cache with TTL",
       "category": "Systems & Concurrency",
       "difficulty": "Hard",
-      "baseline": {
-        "ast_valid": true,
-        "passed": false,
-        "latency_sec": 19.6,
-        "tokens": 764,
-        "error": "AssertionError on eviction order: least-recently-used item not evicted properly"
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (escalated to high)",
-        "repairs": 0,
-        "latency_sec": 142.19,
-        "tokens": 2134,
-        "sandbox": "docker"
+        "effort_level": "auto (escalated from stateful_cache_lru)",
+        "repairs": 2,
+        "latency_sec": 196.44,
+        "tokens": 2306,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 18.07,
+        "tokens": 640,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"<stdin>\", line 72, in <module>\n  File \"<stdin>\", line 59, in test_lru_cache\nAssertionError"
       }
     },
     {
@@ -34,21 +35,21 @@
       "name": "Augmented Interval Tree (Overlap Queries)",
       "category": "Algorithms & Trees",
       "difficulty": "Hard",
-      "baseline": {
-        "ast_valid": true,
-        "passed": true,
-        "latency_sec": 39.81,
-        "tokens": 982,
-        "error": null
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (escalated to high)",
+        "effort_level": "auto (escalated from range_augmented_tree)",
         "repairs": 0,
-        "latency_sec": 148.36,
-        "tokens": 1734,
-        "sandbox": "docker"
+        "latency_sec": 154.35,
+        "tokens": 2869,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 32.68,
+        "tokens": 815,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"<stdin>\", line 85, in <module>\n  File \"<stdin>\", line 68, in test_augmented_interval_tree\nAssertionError"
       }
     },
     {
@@ -56,21 +57,21 @@
       "name": "Sliding Window Rate Limiter",
       "category": "Distributed Systems",
       "difficulty": "Medium",
-      "baseline": {
-        "ast_valid": true,
-        "passed": true,
-        "latency_sec": 28.0,
-        "tokens": 694,
-        "error": null
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (escalated to high)",
-        "repairs": 1,
-        "latency_sec": 137.52,
-        "tokens": 1561,
-        "sandbox": "docker"
+        "effort_level": "system1 (rate_limiter_sliding_window)",
+        "repairs": 0,
+        "latency_sec": 26.98,
+        "tokens": 693,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": true,
+        "latency_sec": 28.63,
+        "tokens": 753,
+        "error": null
       }
     },
     {
@@ -78,21 +79,21 @@
       "name": "LeetCode Easy: Valid Anagram with Unicode & Frequency",
       "category": "LeetCode Easy",
       "difficulty": "Easy",
-      "baseline": {
-        "ast_valid": true,
-        "passed": false,
-        "latency_sec": 21.09,
-        "tokens": 580,
-        "error": "AssertionError on Unicode normalization and whitespace handling"
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (fast-path resolved)",
+        "effort_level": "auto (escalated from unicode_frequency_string)",
         "repairs": 0,
-        "latency_sec": 24.52,
-        "tokens": 673,
-        "sandbox": "docker"
+        "latency_sec": 105.1,
+        "tokens": 2014,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 19.69,
+        "tokens": 509,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"<stdin>\", line 58, in <module>\n  File \"<stdin>\", line 53, in test_is_anagram\nAssertionError"
       }
     },
     {
@@ -100,21 +101,21 @@
       "name": "LeetCode Medium: Coin Change with Path Reconstruction",
       "category": "LeetCode Medium",
       "difficulty": "Medium",
-      "baseline": {
-        "ast_valid": true,
-        "passed": false,
-        "latency_sec": 29.61,
-        "tokens": 812,
-        "error": "AssertionError: optimal coin path reconstruction failed dynamic oracle"
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (fast-path resolved)",
+        "effort_level": "system1 (dp_path_reconstruction)",
         "repairs": 0,
-        "latency_sec": 33.65,
-        "tokens": 892,
-        "sandbox": "docker"
+        "latency_sec": 27.9,
+        "tokens": 713,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 33.59,
+        "tokens": 877,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"<stdin>\", line 82, in <module>\n  File \"<stdin>\", line 79, in test_coin_change_with_path\nAssertionError"
       }
     },
     {
@@ -122,21 +123,21 @@
       "name": "LeetCode Hard: Median of Two Sorted Arrays",
       "category": "LeetCode Hard",
       "difficulty": "Hard",
-      "baseline": {
-        "ast_valid": true,
-        "passed": true,
-        "latency_sec": 39.85,
-        "tokens": 1024,
-        "error": null
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (escalated to high)",
+        "effort_level": "system1 (logarithmic_median_partition)",
         "repairs": 0,
-        "latency_sec": 142.32,
-        "tokens": 1845,
-        "sandbox": "docker"
+        "latency_sec": 27.66,
+        "tokens": 694,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": true,
+        "latency_sec": 38.56,
+        "tokens": 1013,
+        "error": null
       }
     },
     {
@@ -144,21 +145,21 @@
       "name": "System Design Component: Fair ReadWriteLock with Writer Preference",
       "category": "System Design (Component)",
       "difficulty": "Medium-Hard",
-      "baseline": {
-        "ast_valid": true,
-        "passed": false,
-        "latency_sec": 29.96,
-        "tokens": 790,
-        "error": "AssertionError: writer starved by incoming readers; fairness violated"
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (fast-path resolved)",
+        "effort_level": "system1 (concurrency_rwlock)",
         "repairs": 0,
-        "latency_sec": 37.26,
-        "tokens": 933,
-        "sandbox": "docker"
+        "latency_sec": 33.42,
+        "tokens": 854,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 23.25,
+        "tokens": 604,
+        "error": "Runtime error (exit code 1):\nException in thread Thread-1 (reader):\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.11/threading.py\", line 1045, in _bootstrap_inner\n    self.run()\n  File \"/usr/local/lib/python3.11/threading.py\", line 982, in run\n    self._target(*self._args, **self._kwargs)\nException in thread Thread-2 (reader):\nTraceback (most recent call last):\n  File \"<stdin>\", line 59, in reader\nTypeError: '_thread.lock' object is not callable\nException in thread Thread-3 (reader):\nTraceback (most recent call last):\n  File \"/usr/local/lib/python3.11/threading.py\", line 1045, in _bootstrap_inner\n  File \"/usr/local/lib/python3.11/threading.py\", line 1045, in _bootstrap_inner\n    self.run()\n  File \"/usr/local/lib/python3.11/threading.py\", line 982, in run\n    self.run()\n  File \"/usr/local/lib/python3.11/threading.py\", line 982, in run\n    self._target(*self._args, **self._kwargs)\n  File \"<stdin>\", line 59, in reader\nTypeError: '_thread.lock' object is not callable\n    self._target(*self._args, **self._kwargs)\n  File \"<stdin>\", line 59, in reader\nTypeError: '_thread.lock' object is not callable\nTraceback (most recent call last):\n  File \"<stdin>\", line 95, in <module>\n  File \"<stdin>\", line 72, in test_fair_read_write_lock\nAssertionError: Concurrent readers test failed"
       }
     },
     {
@@ -166,21 +167,21 @@
       "name": "System Design Service: Consistent Hashing Ring with Virtual Nodes",
       "category": "System Design (Service)",
       "difficulty": "Hard",
-      "baseline": {
-        "ast_valid": true,
-        "passed": false,
-        "latency_sec": 36.48,
-        "tokens": 920,
-        "error": "AssertionError: duplicate physical nodes in preference list"
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (fast-path resolved)",
-        "repairs": 1,
-        "latency_sec": 79.49,
-        "tokens": 889,
-        "sandbox": "docker"
+        "effort_level": "system1 (distributed_consistent_hash)",
+        "repairs": 0,
+        "latency_sec": 30.52,
+        "tokens": 762,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 34.31,
+        "tokens": 904,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"<stdin>\", line 106, in <module>\n  File \"<stdin>\", line 91, in test_consistent_hash_ring\nAssertionError"
       }
     },
     {
@@ -188,34 +189,59 @@
       "name": "System Design Distributed: Two-Phase Commit Coordinator (2PC)",
       "category": "System Design (Distributed)",
       "difficulty": "Hard",
-      "baseline": {
-        "ast_valid": true,
-        "passed": false,
-        "latency_sec": 31.1,
-        "tokens": 769,
-        "error": "AssertionError: abort message broadcast failed rollback verification"
-      },
       "deepcoder": {
         "ast_valid": true,
         "passed": true,
-        "effort_level": "auto (escalated to high)",
+        "effort_level": "auto (escalated from distributed_2pc)",
         "repairs": 0,
-        "latency_sec": 123.33,
-        "tokens": 1581,
-        "sandbox": "docker"
+        "latency_sec": 165.74,
+        "tokens": 2951,
+        "sandbox": "warmed_docker"
+      },
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 29.7,
+        "tokens": 773,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"<stdin>\", line 82, in <module>\n  File \"<stdin>\", line 79, in test_two_phase_commit\nAssertionError"
       }
     }
   ],
   "summary": {
-    "total_problems": 9,
-    "baseline_pass_count": 3,
-    "baseline_pass_rate_pct": 33.3,
+    "baseline_pass_count": 2,
     "deepcoder_pass_count": 9,
-    "deepcoder_pass_rate_pct": 100.0,
-    "fast_path_resolved_count": 4,
-    "escalated_count": 5,
-    "avg_baseline_latency_sec": 30.61,
-    "avg_deepcoder_latency_sec": 96.52,
-    "avg_fast_path_latency_sec": 43.73
+    "fast_path_resolved_count": 5,
+    "escalated_count": 4,
+    "total_problems": 9,
+    "baseline_latencies": [
+      18.07,
+      32.68,
+      28.63,
+      19.69,
+      33.59,
+      38.56,
+      23.25,
+      34.31,
+      29.7
+    ],
+    "deepcoder_latencies": [
+      196.44,
+      154.35,
+      26.98,
+      105.1,
+      27.9,
+      27.66,
+      33.42,
+      30.52,
+      165.74
+    ],
+    "avg_baseline_latency_sec": 28.72,
+    "avg_deepcoder_latency_sec": 85.35
+  },
+  "final_memory": {
+    "used_gb": 21.29,
+    "total_gb": 36.0,
+    "percent": 78.5,
+    "swap_used_mb": 648.38
   }
 }
