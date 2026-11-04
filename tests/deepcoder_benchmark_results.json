@@ -1,0 +1,82 @@
+{
+  "timestamp": "2026-11-04T02:21:51Z",
+  "hardware": {
+    "used_gb": 22.19,
+    "total_gb": 36.0,
+    "percent": 85.0,
+    "swap_used_mb": 0.0
+  },
+  "problems": [
+    {
+      "id": "concurrent_lru_cache",
+      "name": "Concurrent LRU Cache with TTL",
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 18.58,
+        "tokens": 668,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"/var/folders/zt/xtrvqcm53xg3w_ptb8gklwxc0000gn/T/tmpc0131x8t.py\", line 84, in <module>\n    test_lru_cache()\n    ~~~~~~~~~~~~~~^^\n  File \"/var/folders/zt/xtrvqcm53xg3w_ptb8gklwxc0000gn/T/tmpc0131x8t.py\", line 67, in test_lru_cache\n    assert cache.get(\"f\") is None\n           ^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      "deepcoder": {
+        "ast_valid": true,
+        "passed": true,
+        "repairs": 0,
+        "latency_sec": 56.31,
+        "tokens": 1671,
+        "stage1_plan_latency": 29.6,
+        "stage2_code_latency": 26.24
+      }
+    },
+    {
+      "id": "augmented_interval_tree",
+      "name": "Augmented Interval Tree (Overlap Queries)",
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 30.28,
+        "tokens": 1022,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"/var/folders/zt/xtrvqcm53xg3w_ptb8gklwxc0000gn/T/tmph0tr0y_b.py\", line 99, in <module>\n    test_augmented_interval_tree()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/var/folders/zt/xtrvqcm53xg3w_ptb8gklwxc0000gn/T/tmph0tr0y_b.py\", line 77, in test_augmented_interval_tree\n    assert set(tree.find_overlapping(5, 10)) == {(5, 10), (6, 10), (7, 8), (10, 11)}\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      "deepcoder": {
+        "ast_valid": true,
+        "passed": false,
+        "repairs": 2,
+        "latency_sec": 152.73,
+        "tokens": 1729,
+        "stage1_plan_latency": 30.38,
+        "stage2_code_latency": 31.37
+      }
+    },
+    {
+      "id": "sliding_window_rate_limiter",
+      "name": "Sliding Window Rate Limiter",
+      "baseline": {
+        "ast_valid": true,
+        "passed": false,
+        "latency_sec": 31.49,
+        "tokens": 760,
+        "error": "Runtime error (exit code 1):\nTraceback (most recent call last):\n  File \"/var/folders/zt/xtrvqcm53xg3w_ptb8gklwxc0000gn/T/tmpyqb37_xe.py\", line 94, in <module>\n    test_sliding_window_rate_limiter()\n    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^\n  File \"/var/folders/zt/xtrvqcm53xg3w_ptb8gklwxc0000gn/T/tmpyqb37_xe.py\", line 91, in test_sliding_window_rate_limiter\n    assert not limiter.allow_request(\"client2\")  # Should be denied\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError"
+      },
+      "deepcoder": {
+        "ast_valid": true,
+        "passed": true,
+        "repairs": 0,
+        "latency_sec": 74.32,
+        "tokens": 1708,
+        "stage1_plan_latency": 39.36,
+        "stage2_code_latency": 34.74
+      }
+    }
+  ],
+  "summary": {
+    "baseline_pass_count": 0,
+    "deepcoder_pass_count": 2,
+    "total_problems": 3
+  },
+  "final_memory": {
+    "used_gb": 22.38,
+    "total_gb": 36.0,
+    "percent": 86.6,
+    "swap_used_mb": 0.0
+  }
+}

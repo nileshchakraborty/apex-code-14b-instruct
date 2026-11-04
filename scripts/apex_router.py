@@ -10,12 +10,20 @@ user intent and routes requests:
 import argparse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import os
 import re
 import socketserver
 import sys
 import time
 import urllib.request
 import psutil
+
+# Import 2-Stage DeepCoder Pipeline
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+try:
+    from deepcoder_pipeline import run_deepcoder_pipeline
+except ImportError:
+    run_deepcoder_pipeline = None
 
 UPSTREAM_OLLAMA = "http://127.0.0.1:11434"
 
@@ -59,6 +67,7 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
                 "object": "list",
                 "data": [
                     {"id": "apex-auto", "object": "model", "owned_by": "apex"},
+                    {"id": "apex-deepcoder", "object": "model", "owned_by": "apex"},
                     {"id": "apex-coder-14b", "object": "model", "owned_by": "apex"},
                     {"id": "apex-think-14b", "object": "model", "owned_by": "apex"},
                 ],
@@ -112,6 +121,43 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
             sys.stderr.write(f"⚡ [Smart Router] Intent classified as {intent} -> Routing to {target_model}\n")
         else:
             target_model = requested_model
+
+        # Handle 2-Stage DeepCoder Cognitive Decomposition Pipeline
+        if target_model == "apex-deepcoder" and run_deepcoder_pipeline is not None:
+            sys.stderr.write(f"🧠 [Smart Router] Executing 2-Stage ApexDeepCoder Pipeline...\n")
+            pipe_res = run_deepcoder_pipeline(prompt_text, max_repair_attempts=2, verbose=False)
+            response_payload = {
+                "id": f"chatcmpl-deepcoder-{int(time.time())}",
+                "object": "chat.completion",
+                "created": int(time.time()),
+                "model": "apex-deepcoder",
+                "choices": [
+                    {
+                        "index": 0,
+                        "message": {
+                            "role": "assistant",
+                            "content": f"```python\n{pipe_res['final_code']}\n```",
+                        },
+                        "finish_reason": "stop",
+                    }
+                ],
+                "usage": {
+                    "prompt_tokens": 0,
+                    "completion_tokens": pipe_res.get("tokens_generated", 0),
+                    "total_tokens": pipe_res.get("tokens_generated", 0),
+                },
+                "apex_metadata": {
+                    "ast_valid": pipe_res.get("ast_valid"),
+                    "tests_passed": pipe_res.get("tests_passed"),
+                    "repairs_performed": pipe_res.get("repairs_performed"),
+                    "latency_sec": pipe_res.get("latency_sec"),
+                },
+            }
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(response_payload).encode("utf-8"))
+            return
 
         # Adjust parameters for anti-hallucination if reasoning
         payload["model"] = target_model
