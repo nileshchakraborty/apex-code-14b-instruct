@@ -18,6 +18,7 @@ from lcb_runner.evaluation.compute_code_generation_metrics import codegen_metric
 from lcb_runner.utils.extraction_utils import extract_code
 from lcb_runner.lm_styles import LMStyle
 from scripts.deepcoder_pipeline import query_ollama, extract_code_block, CODE_MODEL
+from scripts.clean_decoding_pipeline import generate_clean_solution
 
 
 def main():
@@ -25,11 +26,26 @@ def main():
     parser.add_argument("--count", type=int, default=25, help="Number of problems to evaluate (default: 25)")
     parser.add_argument("--offset", type=int, default=0, help="Starting problem index (default: 0)")
     parser.add_argument("--output", type=str, default="tests/lcb_benchmark_results.json", help="Output path for results")
+    parser.add_argument(
+        "--pipeline",
+        type=str,
+        default="clean",
+        choices=["standard", "clean", "contracts"],
+        help="Inference pipeline architecture (default: clean)",
+    )
+    parser.add_argument(
+        "--mode",
+        type=str,
+        default="greedy",
+        choices=["greedy", "calibrated"],
+        help="Decoding mode for clean pipeline (default: greedy)",
+    )
     args = parser.parse_args()
 
     print("=" * 72)
-    print("🏆 LIVECODEBENCH QUICK BENCHMARK: APEXCODE-14B")
+    print("🏆 LIVECODEBENCH BENCHMARK: APEXCODE-14B")
     print(f"Target Problem Count: {args.count} | Offset: {args.offset}")
+    print(f"Pipeline: {args.pipeline.upper()} | Decoding Mode: {args.mode}")
     print("=" * 72)
 
     dataset = load_code_generation_dataset()
@@ -46,35 +62,47 @@ def main():
     for idx, prob in enumerate(test_slice, 1):
         print(f"[{idx}/{len(test_slice)}] {prob.question_id}: {prob.question_title} ({prob.difficulty.value})")
 
-        prompt = (
-            f"You are an expert competitive programmer. Solve the following problem in Python 3.\n\n"
-            f"PROBLEM:\n{prob.question_content}\n\n"
-        )
-        if prob.starter_code:
-            prompt += f"STARTER CODE:\n```python\n{prob.starter_code}\n```\n\n"
-        prompt += (
-            "Write the complete solution reading from standard input and printing to standard output "
-            "as required by the problem. Output ONLY the code inside a standard ```python block."
-        )
+        if args.pipeline in ("clean", "contracts"):
+            res = generate_clean_solution(
+                problem_text=prob.question_content,
+                starter_code=prob.starter_code,
+                mode=args.mode,
+                use_ast_contracts=(args.pipeline == "contracts"),
+                is_competitive_io=True,
+            )
+            code = res.get("code", "")
+            latency = res.get("latency_sec", 0.0)
+            tokens = res.get("tokens", 0)
+        else:
+            prompt = (
+                f"You are an expert competitive programmer. Solve the following problem in Python 3.\n\n"
+                f"PROBLEM:\n{prob.question_content}\n\n"
+            )
+            if prob.starter_code:
+                prompt += f"STARTER CODE:\n```python\n{prob.starter_code}\n```\n\n"
+            prompt += (
+                "Write the complete solution reading from standard input and printing to standard output "
+                "as required by the problem. Output ONLY the code inside a standard ```python block."
+            )
 
-        res = query_ollama(
-            model=CODE_MODEL,
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are an elite competitive programmer. Return only clean, correct Python code inside a ```python block.",
-                },
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-            max_tokens=1024,
-        )
-        raw_code = res.get("content", "")
-        code = extract_code(raw_code, LMStyle.OpenAIChat) or extract_code_block(raw_code)
-        latency = res.get("latency_sec", 0.0)
-        tokens = res.get("tokens", 0)
+            res = query_ollama(
+                model=CODE_MODEL,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an elite competitive programmer. Return only clean, correct Python code inside a ```python block.",
+                    },
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.2,
+                max_tokens=1024,
+            )
+            raw_code = res.get("content", "")
+            code = extract_code(raw_code, LMStyle.OpenAIChat) or extract_code_block(raw_code)
+            latency = res.get("latency_sec", 0.0)
+            tokens = res.get("tokens", 0)
+
         tok_speed = round(tokens / latency, 1) if latency > 0 else 0.0
-
         print(f"  ⚡ Synthesized in {latency}s ({tokens} tokens @ {tok_speed} tok/s) | Length: {len(code)} chars")
 
         samples_list.append(prob.get_evaluation_sample())
@@ -148,6 +176,8 @@ def main():
     report = {
         "benchmark": "LiveCodeBench",
         "model": "apex-code-14b-instruct",
+        "pipeline": args.pipeline,
+        "decoding_mode": args.mode,
         "problem_count": len(test_slice),
         "overall_pass_at_1": pass_at_1,
         "difficulty_breakdown": stats_by_diff,
