@@ -102,6 +102,17 @@ def publish(
             commit_message="docs: add verified 9/9 DeepCoder adaptive benchmark results",
         )
 
+    lcb_results_path = "./tests/lcb_benchmark_results.json"
+    if os.path.isfile(lcb_results_path):
+        print("📊 Uploading Verified 25-Problem LiveCodeBench Benchmark Results...")
+        api.upload_file(
+            path_or_fileobj=lcb_results_path,
+            path_in_repo="lcb_benchmark_results.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add verified 25-problem LiveCodeBench evaluation scorecard",
+        )
+
     # Step 4: Scan and upload model weights (.gguf / .safetensors)
     if not os.path.isdir(model_dir):
         print(f"⚠️ Model directory '{model_dir}' does not exist.")
