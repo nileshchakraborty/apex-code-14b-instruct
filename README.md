@@ -173,6 +173,17 @@ ollama run hf.co/nileshc90/apex-code-14b-instruct:Q5_K_M
 ```
 *(See [docs/huggingface_deployment_guide.md](docs/huggingface_deployment_guide.md) for full deployment instructions).*
 
+### 7. General-Purpose Reasoning & Anti-Hallucination Guardrail
+For general-purpose reasoning, mathematics, and research analysis with strict factuality:
+```bash
+# Initialize ApexThink-14B with Min-P sampling and anti-hallucination guardrails:
+ollama create apex-think-14b -f configs/ollama/Modelfile.apex-think-14b
+
+# Run through the Anti-Hallucination Verification Guardrail:
+python3 scripts/anti_hallucination_guardrail.py --model apex-think-14b
+```
+*(See [docs/general_purpose_and_anti_hallucination.md](docs/general_purpose_and_anti_hallucination.md) for full benchmarks and Min-P derivations).*
+
 ---
 
 ## 🤝 IDE Integration
