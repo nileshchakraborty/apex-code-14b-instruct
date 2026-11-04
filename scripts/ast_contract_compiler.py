@@ -156,6 +156,82 @@ def verify_contract_coverage(code_str: str) -> Dict[str, Any]:
 
 
 # ==============================================================================
+# SEMANTIC AST BUG SCANNER
+# ==============================================================================
+
+class SemanticASTBugScanner(ast.NodeVisitor):
+    """Scans AST for common algorithmic semantic bugs (Kadane resets, stride parity, integer division)."""
+
+    def __init__(self):
+        self.bugs_detected: List[str] = []
+        self.has_kadane_pattern = False
+        self.has_kadane_reset = False
+
+    def visit_For(self, node: ast.For):
+        # 1. Check for Kadane's accumulator pattern
+        loop_code = ast.unparse(node)
+        has_sum_accumulation = "+=" in loop_code or "current_sum +" in loop_code or "cur +" in loop_code
+        has_max_tracking = "max(" in loop_code and ("max_sum" in loop_code or "ans" in loop_code or "res" in loop_code)
+        
+        if has_sum_accumulation and has_max_tracking:
+            self.has_kadane_pattern = True
+            # Check for reset or clamp
+            has_reset = (
+                "max(0," in loop_code
+                or "< 0" in loop_code
+                or "= 0" in loop_code
+                or "max(" in loop_code and ("+ num" in loop_code or "+ x" in loop_code or "+ a[" in loop_code)
+            )
+            if has_reset:
+                self.has_kadane_reset = True
+            else:
+                self.bugs_detected.append(
+                    "Missing Kadane Reset: Loop calculates maximum subarray sum but never resets negative accumulators "
+                    "(e.g., current_sum = max(0, current_sum) or current_sum = max(num, current_sum + num))."
+                )
+
+        # 2. Check for negative array stride bug (e.g. range(0, len(neg), 2))
+        if isinstance(node.iter, ast.Call) and getattr(node.iter.func, "id", None) == "range":
+            args = node.iter.args
+            if len(args) == 3 and isinstance(args[2], ast.Constant) and args[2].value == 2:
+                range_target = ast.unparse(args[1]) if len(args) >= 2 else ""
+                if "neg" in range_target.lower():
+                    # Stride 2 over negatives without checking odd/even count
+                    self.bugs_detected.append(
+                        f"Unsafe Negative Stride: Stepping by 2 over '{range_target}' without explicit odd parity check "
+                        "may produce an odd count of negative numbers and invert product sign."
+                    )
+
+        self.generic_visit(node)
+
+    def visit_BinOp(self, node: ast.BinOp):
+        # 3. Check for float division in combinatorics formulas (e.g., n * (n - 1) / 2)
+        if isinstance(node.op, ast.Div):
+            expr_str = ast.unparse(node)
+            if "- 1" in expr_str or "+ 1" in expr_str:
+                self.bugs_detected.append(
+                    f"Floating Point Division in Combinatorics: '{expr_str}' uses '/' instead of integer division '//'."
+                )
+        self.generic_visit(node)
+
+
+def audit_semantic_bugs(code_str: str) -> Dict[str, Any]:
+    """Statically audit code for subtle semantic bugs and invariant violations."""
+    try:
+        tree = ast.parse(code_str)
+    except SyntaxError as e:
+        return {"ast_valid": False, "bugs": [f"SyntaxError: {e.msg}"], "clean": False}
+
+    scanner = SemanticASTBugScanner()
+    scanner.visit(tree)
+    return {
+        "ast_valid": True,
+        "clean": len(scanner.bugs_detected) == 0,
+        "bugs": scanner.bugs_detected,
+    }
+
+
+# ==============================================================================
 # PROMPT CONTRACT INJECTOR
 # ==============================================================================
 
@@ -219,7 +295,35 @@ def naive_sort(arr):
     assert len(res2["violations"]) > 0
     print("  ✅ Code without contracts correctly rejected by linter.")
 
-    print("🎉 All Contract Engine unit tests passed!\n")
+    print("🧪 Running Semantic Bug Scanner Unit Tests...")
+    buggy_kadane = """
+def max_subarray(nums):
+    current_sum = 0
+    max_sum = float('-inf')
+    for num in nums:
+        current_sum += num
+        max_sum = max(max_sum, current_sum)
+    return max_sum
+"""
+    audit1 = audit_semantic_bugs(buggy_kadane)
+    assert audit1["clean"] is False
+    assert any("Kadane" in b for b in audit1["bugs"])
+    print("  ✅ Missing Kadane reset correctly flagged by Semantic Scanner.")
+
+    fixed_kadane = """
+def max_subarray(nums):
+    current_sum = 0
+    max_sum = float('-inf')
+    for num in nums:
+        current_sum = max(0, current_sum + num)
+        max_sum = max(max_sum, current_sum)
+    return max_sum
+"""
+    audit2 = audit_semantic_bugs(fixed_kadane)
+    assert audit2["clean"] is True
+    print("  ✅ Correct Kadane implementation passed cleanly.")
+
+    print("🎉 All Contract Engine and Semantic Bug Scanner unit tests passed!\n")
 
 
 if __name__ == "__main__":
