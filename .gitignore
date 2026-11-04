@@ -48,3 +48,4 @@ datasets/*.jsonl
 *.log
 benchmark_results/
 wandb/
+scratch/

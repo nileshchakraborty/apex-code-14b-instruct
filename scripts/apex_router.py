@@ -104,6 +104,7 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
             return
 
         requested_model = payload.get("model", "apex-auto")
+        reasoning_effort = payload.get("reasoning_effort", "auto")
         is_stream = payload.get("stream", False)
 
         # Extract text to classify intent
@@ -122,9 +123,10 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
         else:
             target_model = requested_model
 
-        # Handle 2-Stage DeepCoder Cognitive Decomposition Pipeline
-        if target_model == "apex-deepcoder" and run_deepcoder_pipeline is not None:
-            sys.stderr.write(f"🧠 [Smart Router] Executing 2-Stage ApexDeepCoder Pipeline...\n")
+        # Handle DeepCoder Cognitive Decomposition Pipeline
+        use_deepcoder = (target_model == "apex-deepcoder") or ("reasoning_effort" in payload and target_model == "apex-coder-14b")
+        if use_deepcoder and run_deepcoder_pipeline is not None:
+            sys.stderr.write(f"🧠 [Smart Router] Executing ApexDeepCoder Pipeline (effort={reasoning_effort})...\n")
             if is_stream:
                 self.send_response(200)
                 self.send_header("Content-Type", "text/event-stream")
@@ -138,12 +140,12 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
                     "object": "chat.completion.chunk",
                     "created": int(time.time()),
                     "model": "apex-deepcoder",
-                    "choices": [{"index": 0, "delta": {"role": "assistant", "content": "🧠 *[ApexDeepCoder: Establishing SSIB Invariant Contract...]*\n\n"}}],
+                    "choices": [{"index": 0, "delta": {"role": "assistant", "content": f"🧠 *[ApexDeepCoder ({reasoning_effort} effort): Analyzing invariants...]*\n\n"}}],
                 }
                 self.wfile.write(f"data: {json.dumps(delta_start)}\n\n".encode("utf-8"))
                 self.wfile.flush()
 
-                pipe_res = run_deepcoder_pipeline(prompt_text, max_repair_attempts=2, verbose=False)
+                pipe_res = run_deepcoder_pipeline(prompt_text, reasoning_effort=reasoning_effort, max_repair_attempts=2, verbose=False)
 
                 # Send verified production code
                 final_content = f"```python\n{pipe_res['final_code']}\n```"
@@ -159,7 +161,7 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
                 self.wfile.flush()
                 return
 
-            pipe_res = run_deepcoder_pipeline(prompt_text, max_repair_attempts=2, verbose=False)
+            pipe_res = run_deepcoder_pipeline(prompt_text, reasoning_effort=reasoning_effort, max_repair_attempts=2, verbose=False)
             response_payload = {
                 "id": f"chatcmpl-deepcoder-{int(time.time())}",
                 "object": "chat.completion",
@@ -181,6 +183,7 @@ class ApexRouterHandler(BaseHTTPRequestHandler):
                     "total_tokens": pipe_res.get("tokens_generated", 0),
                 },
                 "apex_metadata": {
+                    "effort_level": pipe_res.get("effort_level", reasoning_effort),
                     "ast_valid": pipe_res.get("ast_valid"),
                     "tests_passed": pipe_res.get("tests_passed"),
                     "sandbox": pipe_res.get("sandbox_used"),

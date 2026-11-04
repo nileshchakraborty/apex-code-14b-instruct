@@ -135,7 +135,7 @@ def parse_aci_diagnostic_frame(stderr: str, code_str: str) -> dict:
     return frame
 
 
-def verify_and_execute_code(code_str: str, timeout_sec: int = 10, use_docker: bool = True) -> dict:
+def verify_and_execute_code(code_str: str, timeout_sec: int = 15, use_docker: bool = True) -> dict:
     """Verify code using Python AST and execute in a sandboxed runtime (Docker or ulimit)."""
     # Step 1: AST Syntax Check
     try:
@@ -301,28 +301,134 @@ def patch_function_ast(original_code: str, target_func_name: str, new_func_code:
     return ast.unparse(modified_tree)
 
 
-def run_deepcoder_pipeline(
-    prompt: str,
-    max_repair_attempts: int = 2,
-    verbose: bool = True,
-) -> dict:
-    """Run full 2-stage planning, code generation, and 2-tier reflexion repair."""
+def _run_effort_low(prompt: str, verbose: bool = True) -> dict:
+    """Low Effort: Single-shot generation via ApexCode-14B with fast AST/Docker verification (~3-8s)."""
+    t0 = time.perf_counter()
+    mem_initial = get_memory_usage()
+    if verbose:
+        print("\n⚡ [ApexDeepCoder] Running LOW Effort Mode (Fast Single-Shot)...")
+
+    sys_prompt = (
+        "You are an expert Python engineer. Implement clean, robust, type-annotated Python code "
+        "with self-contained executable unit tests. "
+        "Keep tests under 0.1s. Return code inside a standard ```python block."
+    )
+    res = query_ollama(
+        model=CODE_MODEL,
+        messages=[{"role": "system", "content": sys_prompt}, {"role": "user", "content": prompt}],
+        temperature=0.2,
+        max_tokens=1500,
+        num_ctx=8192,
+    )
+    code = extract_code_block(res["content"])
+    exec_res = verify_and_execute_code(code, timeout_sec=15, use_docker=True)
+    total_latency = round(time.perf_counter() - t0, 2)
+    mem_final = get_memory_usage()
+
+    if verbose:
+        status_tag = "✅ PASSED" if exec_res["passed"] else "❌ FAILED"
+        print(f"  {status_tag}: Low Effort Finished in {total_latency}s ({res['tokens']} tokens).")
+
+    return {
+        "prompt": prompt,
+        "effort_level": "low",
+        "plan": "N/A (Bypassed in Low Effort)",
+        "final_code": code,
+        "ast_valid": exec_res.get("ast_valid", False),
+        "tests_passed": exec_res.get("passed", False),
+        "sandbox_used": exec_res.get("sandbox", "unknown"),
+        "repairs_performed": 0,
+        "repair_history": [],
+        "latency_sec": {"stage1_plan": 0.0, "stage2_code": res["latency_sec"], "total": total_latency},
+        "tokens_generated": res["tokens"],
+        "memory": {"initial_ram_gb": mem_initial["used_gb"], "final_ram_gb": mem_final["used_gb"], "swap_used_mb": mem_final["swap_used_mb"]},
+    }
+
+
+def _run_effort_medium(prompt: str, max_repair_attempts: int = 1, verbose: bool = True) -> dict:
+    """Medium Effort: Single-pass In-Context SSIB priming + Docker sandbox verification (~15-22s)."""
+    t0 = time.perf_counter()
+    mem_initial = get_memory_usage()
+    if verbose:
+        print("\n🟡 [ApexDeepCoder] Running MEDIUM Effort Mode (In-Context SSIB Priming)...")
+
+    sys_prompt = (
+        "You are an elite principal algorithms engineer.\n"
+        "Before writing code, output a compact 4-line SSIB INVARIANT CONTRACT defining:\n"
+        "1. Core State Invariants & Boundary Truth Conditions\n"
+        "2. Left and Right Pruning rules (for trees/intervals)\n"
+        "3. Concurrency lock management ('with self._lock:')\n"
+        "4. Dynamic Reference Oracle Pattern for tests\n"
+        "Then implement the complete production class and self-contained executable oracle tests in a standard ```python block."
+    )
+    res = query_ollama(
+        model=CODE_MODEL,
+        messages=[{"role": "system", "content": sys_prompt}, {"role": "user", "content": prompt}],
+        temperature=0.2,
+        max_tokens=2048,
+        num_ctx=8192,
+    )
+    code = extract_code_block(res["content"])
+    exec_res = verify_and_execute_code(code, timeout_sec=15, use_docker=True)
+    repair_count = 0
+    repair_history = []
+
+    while not exec_res["passed"] and repair_count < max_repair_attempts:
+        repair_count += 1
+        aci_frame = exec_res.get("aci_frame") or parse_aci_diagnostic_frame(exec_res.get("error", ""), code)
+        if verbose:
+            print(f"  ⚠️ Medium Mode Repair Attempt {repair_count}: {aci_frame.get('exception_message')[:70]}...")
+
+        repair_prompt = (
+            f"Your Python code failed verification with the following error:\n"
+            f"Line {aci_frame.get('failing_line_number')}: {aci_frame.get('failing_code_snippet')}\n"
+            f"Error: {aci_frame.get('exception_message')}\n\n"
+            f"CURRENT CODE:\n```python\n{code}\n```\n\n"
+            "Fix the root cause and return corrected code inside a ```python block."
+        )
+        rep_res = query_ollama(
+            model=CODE_MODEL,
+            messages=[{"role": "system", "content": "You are a code debugger. Fix the error."}, {"role": "user", "content": repair_prompt}],
+            temperature=0.1,
+            max_tokens=2048,
+            num_ctx=8192,
+        )
+        code = extract_code_block(rep_res["content"])
+        exec_res = verify_and_execute_code(code, timeout_sec=15, use_docker=True)
+        repair_history.append({"attempt": repair_count, "aci_frame": aci_frame, "success": exec_res["passed"]})
+
+    total_latency = round(time.perf_counter() - t0, 2)
+    mem_final = get_memory_usage()
+
+    if verbose:
+        status_tag = "✅ PASSED" if exec_res["passed"] else "❌ FAILED"
+        print(f"  {status_tag}: Medium Effort Finished in {total_latency}s ({res['tokens']} tokens).")
+
+    return {
+        "prompt": prompt,
+        "effort_level": "medium",
+        "plan": "In-Context SSIB Header",
+        "final_code": code,
+        "ast_valid": exec_res.get("ast_valid", False),
+        "tests_passed": exec_res.get("passed", False),
+        "sandbox_used": exec_res.get("sandbox", "unknown"),
+        "repairs_performed": repair_count,
+        "repair_history": repair_history,
+        "latency_sec": {"stage1_plan": 0.0, "stage2_code": res["latency_sec"], "total": total_latency},
+        "tokens_generated": res["tokens"],
+        "memory": {"initial_ram_gb": mem_initial["used_gb"], "final_ram_gb": mem_final["used_gb"], "swap_used_mb": mem_final["swap_used_mb"]},
+    }
+
+
+def _run_effort_high(prompt: str, max_repair_attempts: int = 2, verbose: bool = True) -> dict:
+    """High Effort: Full 2-Stage SSIB Invariants (ApexThink-14B) + Oracle Code (ApexCode-14B) + Reflexion (~45-65s)."""
     pipeline_start = time.perf_counter()
     mem_initial = get_memory_usage()
 
     if verbose:
-        print("\n" + "=" * 68)
-        print("🧠 [ApexDeepCoder] 2-Stage Cognitive Invariant Pipeline")
-        print(f"Task: {prompt[:80]}...")
-        print(f"Initial Memory: {mem_initial['used_gb']} GB / {mem_initial['total_gb']} GB")
-        print("=" * 68)
+        print("\n🔴 [ApexDeepCoder] Running HIGH Effort Mode (Full 2-Stage Invariant Decomposition)...")
 
-    # -------------------------------------------------------------
     # STAGE 1: SSIB Invariant Planning (ApexThink-14B, num_ctx: 4096)
-    # -------------------------------------------------------------
-    if verbose:
-        print("\n▶ STAGE 1: SSIB Algorithmic Invariant Planning (ApexThink-14B)...")
-
     stage1_sys = (
         "You are an expert algorithms and systems architect. "
         "Analyze the programming task and produce a machine-readable STRUCTURED SEMANTIC INVARIANT BLOCK (SSIB):\n"
@@ -339,24 +445,16 @@ def run_deepcoder_pipeline(
     )
     stage1_res = query_ollama(
         model=THINK_MODEL,
-        messages=[
-            {"role": "system", "content": stage1_sys},
-            {"role": "user", "content": prompt},
-        ],
+        messages=[{"role": "system", "content": stage1_sys}, {"role": "user", "content": prompt}],
         temperature=0.6,
         max_tokens=896,
         num_ctx=4096,
     )
     plan_content = stage1_res["content"]
     if verbose:
-        print(f"  ✅ SSIB Contract established in {stage1_res['latency_sec']}s ({stage1_res['tokens']} tokens).")
+        print(f"  ✅ Stage 1 SSIB Contract established in {stage1_res['latency_sec']}s ({stage1_res['tokens']} tokens).")
 
-    # -------------------------------------------------------------
-    # STAGE 2: Production Code Synthesis with Oracle Property Tests
-    # -------------------------------------------------------------
-    if verbose:
-        print("\n▶ STAGE 2: Code Synthesis with Reference Oracle Verification (ApexCode-14B)...")
-
+    # STAGE 2: Code Synthesis with Reference Oracle Verification
     stage2_sys = (
         "You are an elite principal software engineer. Implement the solution adhering strictly "
         "to the SSIB Invariant Contract.\n"
@@ -378,10 +476,7 @@ def run_deepcoder_pipeline(
     )
     stage2_res = query_ollama(
         model=CODE_MODEL,
-        messages=[
-            {"role": "system", "content": stage2_sys},
-            {"role": "user", "content": stage2_prompt},
-        ],
+        messages=[{"role": "system", "content": stage2_sys}, {"role": "user", "content": stage2_prompt}],
         temperature=0.2,
         max_tokens=2048,
         num_ctx=16384,
@@ -389,23 +484,16 @@ def run_deepcoder_pipeline(
     code_content = stage2_res["content"]
     extracted_code = extract_code_block(code_content)
     if verbose:
-        print(f"  ✅ Code generated in {stage2_res['latency_sec']}s ({stage2_res['tokens']} tokens).")
+        print(f"  ✅ Stage 2 Code generated in {stage2_res['latency_sec']}s ({stage2_res['tokens']} tokens).")
 
-    # -------------------------------------------------------------
-    # STAGE 3: ACI-Driven 2-Tier Reflexion Loop
-    # -------------------------------------------------------------
-    if verbose:
-        print("\n▶ STAGE 3: Zero-Trust Sandboxed Verification (Docker)...")
-
-    exec_result = verify_and_execute_code(extracted_code, timeout_sec=10, use_docker=True)
+    # STAGE 3: Zero-Trust Sandboxed Verification (Docker) + 2-Tier Reflexion
+    exec_result = verify_and_execute_code(extracted_code, timeout_sec=15, use_docker=True)
     repair_count = 0
     repair_history = []
 
     while not exec_result["passed"] and repair_count < max_repair_attempts:
         repair_count += 1
-        aci_frame = exec_result.get("aci_frame") or parse_aci_diagnostic_frame(
-            exec_result.get("error", ""), extracted_code
-        )
+        aci_frame = exec_result.get("aci_frame") or parse_aci_diagnostic_frame(exec_result.get("error", ""), extracted_code)
         failing_func = aci_frame.get("failing_function")
 
         if verbose:
@@ -417,7 +505,21 @@ def run_deepcoder_pipeline(
         tier1_succeeded = False
         is_test_function = failing_func and (failing_func.startswith("test") or failing_func in ("main", "<module>"))
 
+        # Verify failing_func is an actual function in the AST and not a module-level error
+        is_actual_function = False
         if failing_func and not is_test_function and failing_func not in ("__init__",):
+            try:
+                tree_check = ast.parse(extracted_code)
+                for node in ast.walk(tree_check):
+                    if isinstance(node, ast.FunctionDef) and node.name == failing_func:
+                        is_actual_function = True
+                        break
+            except Exception:
+                is_actual_function = False
+
+        is_module_level_error = aci_frame.get("failure_type") in ("NameError", "ImportError", "SyntaxError", "IndentationError")
+
+        if is_actual_function and not is_module_level_error:
             if verbose:
                 print(f"  🩹 Attempting Tier 1 Surgical AST Patch on function '{failing_func}'...")
 
@@ -430,10 +532,7 @@ def run_deepcoder_pipeline(
             )
             patch_res = query_ollama(
                 model=CODE_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are a surgical code debugger. Rewrite ONLY the specified function."},
-                    {"role": "user", "content": tier1_prompt},
-                ],
+                messages=[{"role": "system", "content": "You are a surgical code debugger. Rewrite ONLY the specified function."}, {"role": "user", "content": tier1_prompt}],
                 temperature=0.1,
                 max_tokens=1024,
                 num_ctx=8192,
@@ -441,7 +540,7 @@ def run_deepcoder_pipeline(
             new_func_code = extract_code_block(patch_res["content"])
             try:
                 patched_code = patch_function_ast(extracted_code, failing_func, new_func_code)
-                test_run = verify_and_execute_code(patched_code, timeout_sec=10, use_docker=True)
+                test_run = verify_and_execute_code(patched_code, timeout_sec=15, use_docker=True)
                 if test_run["passed"]:
                     extracted_code = patched_code
                     exec_result = test_run
@@ -452,7 +551,7 @@ def run_deepcoder_pipeline(
                 if verbose:
                     print(f"  ℹ️ Tier 1 splice fell back: {e}")
 
-        # TIER 2: Full Module Escalation (if Tier 1 was not applicable or failed)
+        # TIER 2: Full Module Escalation
         if not tier1_succeeded:
             if verbose:
                 print("  🔄 Escalating to Tier 2 Module-Level Re-synthesis with ACI Diagnostics...")
@@ -464,39 +563,34 @@ def run_deepcoder_pipeline(
                 "DIAGNOSTIC GUIDANCE:\n"
                 f"- Failing Line {aci_frame.get('failing_line_number')}: {aci_frame.get('failing_code_snippet')}\n"
                 f"- Error: {aci_frame.get('exception_message')}\n"
-                "- If an assertion failed in unit tests, check whether the class implementation had a bug OR if the test assertion made an arithmetic error about which item was evicted/retained.\n"
-                "- Ensure both the class logic and the self-contained test assertions are mathematically sound and pass 100%.\n"
-                "Return the corrected self-contained Python code in a ```python block."
+                "- Include all required standard library imports at top (e.g. `from typing import Dict, List, Optional, Tuple, Any, Set`; `import threading, time, bisect, hashlib`).\n"
+                "- If an assertion failed in unit tests, check whether the class implementation had a bug OR if the test assertion made an arithmetic or protocol assumption error.\n"
+                "- Ensure all method signatures match the specification.\n"
+                "- Ensure both the class logic and the self-contained test assertions pass 100%.\n"
+                "Return the complete corrected self-contained Python code in a ```python block."
             )
             repair_res = query_ollama(
                 model=CODE_MODEL,
-                messages=[
-                    {"role": "system", "content": "You are an expert systems engineer. Repair the code so all oracle property tests pass."},
-                    {"role": "user", "content": tier2_prompt},
-                ],
+                messages=[{"role": "system", "content": "You are an expert systems engineer. Repair the code so all oracle property tests pass."}, {"role": "user", "content": tier2_prompt}],
                 temperature=0.1,
                 max_tokens=2048,
                 num_ctx=16384,
             )
             extracted_code = extract_code_block(repair_res["content"])
-            exec_result = verify_and_execute_code(extracted_code, timeout_sec=10, use_docker=True)
+            exec_result = verify_and_execute_code(extracted_code, timeout_sec=15, use_docker=True)
 
-        repair_history.append({
-            "attempt": repair_count,
-            "tier": 1 if tier1_succeeded else 2,
-            "aci_frame": aci_frame,
-            "success": exec_result["passed"],
-        })
+        repair_history.append({"attempt": repair_count, "tier": 1 if tier1_succeeded else 2, "aci_frame": aci_frame, "success": exec_result["passed"]})
 
     if verbose:
         status_tag = "✅ PASSED" if exec_result["passed"] else "❌ FAILED"
-        print(f"  {status_tag}: Sandboxed Verification Complete (Passed: {exec_result['passed']}, Repairs: {repair_count}, Sandbox: {exec_result.get('sandbox')})")
+        print(f"  {status_tag}: High Effort Complete (Passed: {exec_result['passed']}, Repairs: {repair_count}, Sandbox: {exec_result.get('sandbox')})")
 
     total_latency = round(time.perf_counter() - pipeline_start, 2)
     mem_final = get_memory_usage()
 
     return {
         "prompt": prompt,
+        "effort_level": "high",
         "plan": plan_content,
         "final_code": extracted_code,
         "ast_valid": exec_result.get("ast_valid", False),
@@ -504,18 +598,45 @@ def run_deepcoder_pipeline(
         "sandbox_used": exec_result.get("sandbox", "unknown"),
         "repairs_performed": repair_count,
         "repair_history": repair_history,
-        "latency_sec": {
-            "stage1_plan": stage1_res["latency_sec"],
-            "stage2_code": stage2_res["latency_sec"],
-            "total": total_latency,
-        },
+        "latency_sec": {"stage1_plan": stage1_res["latency_sec"], "stage2_code": stage2_res["latency_sec"], "total": total_latency},
         "tokens_generated": stage1_res["tokens"] + stage2_res["tokens"],
-        "memory": {
-            "initial_ram_gb": mem_initial["used_gb"],
-            "final_ram_gb": mem_final["used_gb"],
-            "swap_used_mb": mem_final["swap_used_mb"],
-        },
+        "memory": {"initial_ram_gb": mem_initial["used_gb"], "final_ram_gb": mem_final["used_gb"], "swap_used_mb": mem_final["swap_used_mb"]},
     }
+
+
+def run_deepcoder_pipeline(
+    prompt: str,
+    reasoning_effort: str = "auto",
+    max_repair_attempts: int = 2,
+    verbose: bool = True,
+) -> dict:
+    """Run ApexDeepCoder pipeline with configurable reasoning_effort ('low', 'medium', 'high', 'auto')."""
+    effort = reasoning_effort.lower().strip()
+    if effort == "low":
+        return _run_effort_low(prompt, verbose=verbose)
+    elif effort == "medium":
+        return _run_effort_medium(prompt, max_repair_attempts=1, verbose=verbose)
+    elif effort == "high":
+        return _run_effort_high(prompt, max_repair_attempts=max_repair_attempts, verbose=verbose)
+    else:  # "auto" - Optimistic JIT Escalation
+        if verbose:
+            print("\n⚡ [ApexDeepCoder: Auto Effort] Starting Optimistic Fast-Path (Medium)...")
+        med_res = _run_effort_medium(prompt, max_repair_attempts=1, verbose=verbose)
+        if med_res["tests_passed"]:
+            if verbose:
+                print(f"🚀 [ApexDeepCoder: Auto Effort] Fast-Path SUCCEEDED in {med_res['latency_sec']['total']}s! Returning immediately.")
+            med_res["effort_level"] = "auto (fast-path resolved)"
+            return med_res
+
+        if verbose:
+            print(f"⚠️ [ApexDeepCoder: Auto Effort] Fast-Path encountered test failure. JIT Escalating to High Effort (R1 Invariants)...")
+        high_res = _run_effort_high(prompt, max_repair_attempts=max_repair_attempts, verbose=verbose)
+        high_res["effort_level"] = "auto (escalated to high)"
+        # Combine metrics
+        high_res["tokens_generated"] += med_res["tokens_generated"]
+        high_res["latency_sec"]["fast_path_attempt"] = med_res["latency_sec"]["total"]
+        high_res["latency_sec"]["total"] = round(high_res["latency_sec"]["total"] + med_res["latency_sec"]["total"], 2)
+        return high_res
 
 
 def main():
