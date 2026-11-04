@@ -38,7 +38,8 @@ BENCHMARK_PROBLEMS = [
             "Implement a thread-safe LRUCache in Python supporting max_size and per-key TTL (time-to-live). "
             "Include get(key), put(key, value, ttl=None), delete(key), and cleanup_expired(). "
             "Use threading.RLock for thread safety and an OrderedDict or doubly-linked list. "
-            "Include a self-contained test suite with assert statements verifying cache eviction, TTL expiry, and basic thread concurrency."
+            "In your test suite, verify that when capacity exceeds max_size (e.g. max_size=2 and 3 keys 'a','b','c' are added), "
+            "the least-recently-used key ('a') is evicted, recent keys ('b','c') are retained, and expired TTL entries return None."
         ),
     },
     {
@@ -50,7 +51,8 @@ BENCHMARK_PROBLEMS = [
             "and maintains 'max_high' (maximum high value in its subtree). "
             "Include insert(low, high) and find_overlapping(low, high) -> list[tuple[int, int]]. "
             "Handle point intervals [x, x] and negative coordinates properly. "
-            "In your executable test suite, compare results using set(tree.find_overlapping(...)) == set(...) to be independent of traversal order."
+            "In your executable test suite, verify find_overlapping(q_low, q_high) dynamically against an O(N) linear filter oracle: "
+            "set(tree.find_overlapping(q_low, q_high)) == set(iv for iv in all_intervals if iv[0] <= q_high and iv[1] >= q_low)."
         ),
     },
     {
@@ -85,9 +87,10 @@ def run_single_shot_baseline(prompt: str) -> dict:
         ],
         temperature=0.2,
         max_tokens=2048,
+        num_ctx=16384,
     )
     extracted = extract_code_block(res["content"])
-    exec_res = verify_and_execute_code(extracted, timeout_sec=10)
+    exec_res = verify_and_execute_code(extracted, timeout_sec=10, use_docker=True)
     total_time = round(time.perf_counter() - t0, 2)
 
     return {
