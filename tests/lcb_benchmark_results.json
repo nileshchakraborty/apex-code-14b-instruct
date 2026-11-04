@@ -1,0 +1,302 @@
+{
+  "benchmark": "LiveCodeBench",
+  "model": "apex-code-14b-instruct",
+  "problem_count": 25,
+  "overall_pass_at_1": 0.4,
+  "difficulty_breakdown": {
+    "easy": [
+      4,
+      10
+    ],
+    "medium": [
+      4,
+      10
+    ],
+    "hard": [
+      2,
+      5
+    ]
+  },
+  "timing": {
+    "generation_sec": 257.24,
+    "evaluation_sec": 9.45,
+    "total_sec": 266.69
+  },
+  "problems": [
+    {
+      "question_id": "1873_A",
+      "question_title": "A. Short Sort",
+      "difficulty": "easy",
+      "latency_sec": 7.93,
+      "tokens": 71,
+      "code": "def can_form_abc(s):\n    if s == \"abc\":\n        return \"YES\"\n    if s in [\"bca\", \"cab\"]:\n        return \"YES\"\n    return \"NO\"\n\nt = int(input())\nfor _ in range(t):\n    s = input().strip()\n    print(can_form_abc(s))",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1873_B",
+      "question_title": "B. Good Kid",
+      "difficulty": "easy",
+      "latency_sec": 8.24,
+      "tokens": 270,
+      "code": "import sys\n\ndef max_product_after_increment(digits):\n    n = len(digits)\n    if n == 1:\n        return digits[0] + 1\n    \n    # Find the position of the first non-9 digit from the left\n    for i in range(n):\n        if digits[i] != 9:\n            # Increment this digit and calculate the product\n            new_digits = digits[:]\n            new_digits[i] += 1\n            product = 1\n            for d in new_digits:\n                product *= d\n            return product\n    \n    # If all digits are 9, incrementing any one will result in a product of 10^(n-1)\n    return 10 ** (n - 1)\n\ndef main():\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    \n    index = 0\n    t = int(data[index])\n    index += 1\n    \n    results = []\n    for _ in range(t):\n        n = int(data[index])\n        index += 1\n        digits = list(map(int, data[index:index + n]))\n        index += n\n        results.append(max_product_after_increment(digits))\n    \n    for result in results:\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1873_D",
+      "question_title": "D. 1D Eraser",
+      "difficulty": "easy",
+      "latency_sec": 5.45,
+      "tokens": 135,
+      "code": "import sys\ninput = sys.stdin.read\ndata = input().split()\n\nt = int(data[0])\nindex = 1\n\nresults = []\n\nfor _ in range(t):\n    n = int(data[index])\n    k = int(data[index + 1])\n    s = data[index + 2]\n    \n    index += 3\n    \n    count = 0\n    i = 0\n    while i < n:\n        if s[i] == 'B':\n            count += 1\n            i += k\n        else:\n            i += 1\n    \n    results.append(count)\n\nfor result in results:\n    print(result)",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13
+    },
+    {
+      "question_id": "1883_B",
+      "question_title": "B. Chemistry",
+      "difficulty": "medium",
+      "latency_sec": 10.61,
+      "tokens": 290,
+      "code": "import sys\n\ndef can_form_palindrome(n, k, s):\n    from collections import Counter\n    \n    # Count the frequency of each character in the string\n    freq = Counter(s)\n    \n    # Count how many characters have an odd frequency\n    odd_count = sum(1 for count in freq.values() if count % 2 != 0)\n    \n    # To form a palindrome, we can have at most one character with an odd frequency\n    # The number of deletions needed is the difference between odd_count and 1\n    needed_deletions = max(0, odd_count - 1)\n    \n    # Check if we can remove exactly k characters to make the string a palindrome\n    return needed_deletions <= k\n\ndef main():\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    \n    index = 0\n    t = int(data[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(data[index])\n        k = int(data[index + 1])\n        s = data[index + 2]\n        index += 3\n        \n        if can_form_palindrome(n, k, s):\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n    \n    print(\"\\n\".join(results))\n\nif __name__ == \"__main__\":\n    main()",
+      "passed": true,
+      "passed_cases": 4,
+      "total_cases": 4
+    },
+    {
+      "question_id": "1883_C",
+      "question_title": "C. Raspberries",
+      "difficulty": "medium",
+      "latency_sec": 21.66,
+      "tokens": 674,
+      "code": "import sys\n\ndef solve(n, k, a):\n    if k == 2:\n        # Check if there is at least one even number\n        for x in a:\n            if x % 2 == 0:\n                return 0\n        return n  # All numbers are odd, need to make one even\n\n    elif k == 3:\n        # Check if there is at least one number divisible by 3\n        for x in a:\n            if x % 3 == 0:\n                return 0\n        # Find the minimum number of operations to make a number divisible by 3\n        min_ops = float('inf')\n        for x in a:\n            if x % 3 == 1:\n                min_ops = min(min_ops, 2)\n            elif x % 3 == 2:\n                min_ops = min(min_ops, 1)\n        return min_ops\n\n    elif k == 4:\n        # Check if there is at least one number divisible by 4\n        for x in a:\n            if x % 4 == 0:\n                return 0\n        # Check if there are at least two even numbers\n        even_count = sum(1 for x in a if x % 2 == 0)\n        if even_count >= 2:\n            return 0\n        # Find the minimum number of operations to make a number divisible by 4\n        min_ops = float('inf')\n        for x in a:\n            if x % 4 == 1:\n                min_ops = min(min_ops, 3)\n            elif x % 4 == 2:\n                min_ops = min(min_ops, 2)\n            elif x % 4 == 3:\n                min_ops = min(min_ops, 1)\n        return min_ops\n\n    elif k == 5:\n        # Check if there is at least one number divisible by 5\n        for x in a:\n            if x % 5 == 0:\n                return 0\n        # Find the minimum number of operations to make a number divisible by 5\n        min_ops = float('inf')\n        for x in a:\n            if x % 5 == 1:\n                min_ops = min(min_ops, 4)\n            elif x % 5 == 2:\n                min_ops = min(min_ops, 3)\n            elif x % 5 == 3:\n                min_ops = min(min_ops, 2)\n            elif x % 5 == 4:\n                min_ops = min(min_ops, 1)\n        return min_ops\n\ndef main():\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    \n    index = 0\n    t = int(data[index])\n    index += 1\n    \n    results = []\n    for _ in range(t):\n        n = int(data[index])\n        k = int(data[index + 1])\n        index += 2\n        a = list(map(int, data[index:index + n]))\n        index += n\n        \n        result = solve(n, k, a)\n        results.append(result)\n    \n    print(\"\\n\".join(map(str, results)))\n\nif __name__ == \"__main__\":\n    main()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1899_A",
+      "question_title": "A. Game with Integers",
+      "difficulty": "easy",
+      "latency_sec": 4.45,
+      "tokens": 125,
+      "code": "def determine_winner(n):\n    if n % 3 == 0:\n        return \"First\"\n    elif (n + 1) % 3 == 0 or (n - 1) % 3 == 0:\n        return \"First\"\n    else:\n        return \"Second\"\n\nimport sys\n\ninput = sys.stdin.read\ndata = input().split()\n\nt = int(data[0])\nresults = []\n\nfor i in range(1, t + 1):\n    n = int(data[i])\n    results.append(determine_winner(n))\n\nprint(\"\\n\".join(results))",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1899_B",
+      "question_title": "B. 250 Thousand Tons of TNT",
+      "difficulty": "hard",
+      "latency_sec": 12.02,
+      "tokens": 311,
+      "code": "import sys\n\ndef max_absolute_difference(n, weights):\n    prefix_sums = [0] * (n + 1)\n    for i in range(n):\n        prefix_sums[i + 1] = prefix_sums[i] + weights[i]\n    \n    max_diff = 0\n    for k in range(1, n + 1):\n        if n % k == 0:\n            truck_count = n // k\n            min_weight = float('inf')\n            max_weight = float('-inf')\n            for i in range(truck_count):\n                start = i * k\n                end = (i + 1) * k\n                truck_weight = prefix_sums[end] - prefix_sums[start]\n                min_weight = min(min_weight, truck_weight)\n                max_weight = max(max_weight, truck_weight)\n            max_diff = max(max_diff, max_weight - min_weight)\n    \n    return max_diff\n\ndef main():\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    \n    index = 0\n    t = int(data[index])\n    index += 1\n    \n    results = []\n    for _ in range(t):\n        n = int(data[index])\n        index += 1\n        weights = list(map(int, data[index:index + n]))\n        index += n\n        results.append(max_absolute_difference(n, weights))\n    \n    for result in results:\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13
+    },
+    {
+      "question_id": "1899_C",
+      "question_title": "C. Yarik and Array",
+      "difficulty": "hard",
+      "latency_sec": 11.22,
+      "tokens": 318,
+      "code": "import sys\n\ndef max_alternating_parity_subarray_sum(arr):\n    n = len(arr)\n    if n == 0:\n        return 0\n    \n    # Initialize variables to keep track of the maximum sums ending in odd and even indexed elements\n    max_ending_odd = 0\n    max_ending_even = 0\n    max_sum = -float('inf')\n    \n    for i in range(n):\n        if arr[i] % 2 == 0:  # Even number\n            max_ending_even = max(max_ending_odd + arr[i], arr[i])\n            max_ending_odd = 0\n        else:  # Odd number\n            max_ending_odd = max(max_ending_even + arr[i], arr[i])\n            max_ending_even = 0\n        \n        max_sum = max(max_sum, max_ending_odd, max_ending_even)\n    \n    return max_sum\n\ndef main():\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    \n    index = 0\n    t = int(data[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(data[index])\n        index += 1\n        arr = list(map(int, data[index:index + n]))\n        index += n\n        \n        result = max_alternating_parity_subarray_sum(arr)\n        results.append(result)\n    \n    for result in results:\n        print(result)\n\nif __name__ == \"__main__\":\n    main()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1899_D",
+      "question_title": "D. Yarik and Musical Notes",
+      "difficulty": "hard",
+      "latency_sec": 33.63,
+      "tokens": 1024,
+      "code": "```python\nimport sys\nfrom collections import Counter\n\ndef solve():\n    import sys\n    import math\n    import collections\n    import heapq\n    import bisect\n    import itertools\n    import functools\n    import operator\n    import string\n    import random\n    import array\n    import struct\n    import cmath\n    import decimal\n    import fractions\n    import numbers\n    import math\n    import statistics\n    import warnings\n    import os\n    import sys\n    import io\n    import atexit\n    import signal\n    import traceback\n    import inspect\n    import types\n    import copy\n    import pickle\n    import json\n    import xml.etree.ElementTree as ET\n    import re\n    import doctest\n    import unittest\n    import time\n    import datetime\n    import calendar\n    import locale\n    import gettext\n    import logging\n    import logging.config\n    import logging.handlers\n    import argparse\n    import optparse\n    import configparser\n    import shlex\n    import subprocess\n    import multiprocessing\n    import threading\n    import queue\n    import socket\n    import select\n    import ssl\n    import http.client\n    import urllib.request\n    import urllib.parse\n    import urllib.error\n    import ftplib\n    import email\n    import mailbox\n    import imaplib\n    import smtplib\n    import poplib\n    import nntplib\n    import telnetlib\n    import uuid\n    import base64\n    import hashlib\n    import hmac\n    import secrets\n    import ipaddress\n    import socketserver\n    import http.server\n    import xmlrpc.client\n    import xmlrpc.server\n    import jsonrpc\n    import jsonrpc.server\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server\n    import jsonrpc.client\n    import jsonrpc.proxy\n    import jsonrpc.jsonrpc\n    import jsonrpc.exceptions\n    import jsonrpc.types\n    import jsonrpc.dispatcher\n    import jsonrpc.utils\n    import jsonrpc.compat\n    import jsonrpc.logging\n    import jsonrpc.config\n    import jsonrpc.server",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2727",
+      "question_title": "number-of-senior-citizens",
+      "difficulty": "easy",
+      "latency_sec": 5.35,
+      "tokens": 137,
+      "code": "from typing import List\n\nclass Solution:\n    def countSeniors(self, details: List[str]) -> int:\n        count = 0\n        for detail in details:\n            age = int(detail[11:13])\n            if age > 60:\n                count += 1\n        return count\n\n# Example usage:\nif __name__ == \"__main__\":\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    details = data[1:]  # Assuming the first input is the number of details\n    solution = Solution()\n    result = solution.countSeniors(details)\n    print(result)",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2728",
+      "question_title": "sum-in-a-matrix",
+      "difficulty": "medium",
+      "latency_sec": 6.72,
+      "tokens": 183,
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def matrixSum(self, nums: List[List[int]]) -> int:\n        score = 0\n        for _ in range(len(nums[0])):\n            max_values = []\n            for row in nums:\n                max_values.append(max(row))\n                row.remove(max(row))\n            score += max(max_values)\n        return score\n\nif __name__ == \"__main__\":\n    input = sys.stdin.read\n    data = input().split()\n    \n    # Parse input\n    n = int(data[0])\n    m = int(data[1])\n    nums = []\n    index = 2\n    for _ in range(n):\n        row = list(map(int, data[index:index + m]))\n        nums.append(row)\n        index += m\n    \n    solution = Solution()\n    result = solution.matrixSum(nums)\n    print(result)",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2730",
+      "question_title": "maximum-or",
+      "difficulty": "medium",
+      "latency_sec": 10.83,
+      "tokens": 320,
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def maximumOr(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        prefix_or = [0] * n\n        suffix_or = [0] * n\n        \n        # Calculate prefix OR values\n        for i in range(1, n):\n            prefix_or[i] = prefix_or[i - 1] | nums[i - 1]\n        \n        # Calculate suffix OR values\n        for i in range(n - 2, -1, -1):\n            suffix_or[i] = suffix_or[i + 1] | nums[i + 1]\n        \n        max_or = 0\n        \n        # Calculate the maximum OR value after applying the operation at most k times\n        for i in range(n):\n            # Multiply nums[i] by 2^k and calculate the OR with prefix and suffix OR values\n            current_or = (nums[i] << k) | prefix_or[i] | suffix_or[i]\n            max_or = max(max_or, current_or)\n        \n        return max_or\n\n# Read input from standard input\ninput = sys.stdin.read\ndata = input().split()\n\nn = int(data[0])\nk = int(data[n + 1])\nnums = list(map(int, data[1:n + 1]))\n\n# Create an instance of the Solution class and call the maximumOr method\nsolution = Solution()\nresult = solution.maximumOr(nums, k)\n\n# Print the result to standard output\nprint(result)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2754",
+      "question_title": "maximum-strength-of-a-group",
+      "difficulty": "medium",
+      "latency_sec": 9.34,
+      "tokens": 267,
+      "code": "from typing import List\n\nclass Solution:\n    def maxStrength(self, nums: List[int]) -> int:\n        # Sort the numbers to easily pick the largest and smallest values\n        nums.sort()\n        \n        # Initialize the result\n        result = 1\n        count_positive = 0\n        count_negative = 0\n        \n        # Iterate through the sorted list\n        for num in nums:\n            if num > 0:\n                result *= num\n                count_positive += 1\n            elif num < 0:\n                result *= num\n                count_negative += 1\n        \n        # If there are no positive numbers and less than 2 negative numbers, we can't form a valid group\n        if count_positive == 0 and count_negative < 2:\n            return max(nums)\n        \n        # If the number of negative numbers is odd, divide by the smallest (most negative) number\n        if count_negative % 2 != 0:\n            result //= nums[0]\n        \n        return result\n\n# Read input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\nnums = list(map(int, data))\n\n# Create an instance of the Solution class and call the maxStrength method\nsolution = Solution()\nprint(solution.maxStrength(nums))",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2755",
+      "question_title": "extra-characters-in-a-string",
+      "difficulty": "medium",
+      "latency_sec": 7.38,
+      "tokens": 193,
+      "code": "from typing import List\n\nclass Solution:\n    def minExtraChar(self, s: str, dictionary: List[str]) -> int:\n        n = len(s)\n        dp = [0] * (n + 1)\n        \n        for i in range(1, n + 1):\n            dp[i] = dp[i - 1] + 1\n            for word in dictionary:\n                if s.startswith(word, i - len(word)):\n                    dp[i] = min(dp[i], dp[i - len(word)])\n        \n        return dp[n]\n\n# Read input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\n\ns = data[0]\ndictionary = data[1:]\n\n# Create an instance of the Solution class and call the minExtraChar method\nsolution = Solution()\nresult = solution.minExtraChar(s, dictionary)\n\n# Print the result to standard output\nprint(result)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2756",
+      "question_title": "buy-two-chocolates",
+      "difficulty": "easy",
+      "latency_sec": 7.63,
+      "tokens": 201,
+      "code": "from typing import List\n\nclass Solution:\n    def buyChoco(self, prices: List[int], money: int) -> int:\n        # Sort the prices to find the two cheapest chocolates\n        prices.sort()\n        \n        # Calculate the cost of the two cheapest chocolates\n        cost = prices[0] + prices[1]\n        \n        # Check if we have enough money to buy them\n        if money >= cost:\n            return money - cost\n        else:\n            return money\n\n# Read input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\n\n# Parse the input\nn = int(data[0])\nmoney = int(data[n+1])\nprices = list(map(int, data[1:n+1]))\n\n# Create an instance of the Solution class and call the buyChoco method\nsolution = Solution()\nresult = solution.buyChoco(prices, money)\n\n# Print the result to standard output\nprint(result)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2757",
+      "question_title": "count-of-integers",
+      "difficulty": "hard",
+      "latency_sec": 11.54,
+      "tokens": 298,
+      "code": "MOD = 10**9 + 7\n\nclass Solution:\n    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:\n        \n        def count_up_to(num_str, max_sum):\n            @cache\n            def dfs(pos, is_tight, current_sum):\n                if pos == len(num_str):\n                    return min_sum <= current_sum <= max_sum\n                \n                limit = int(num_str[pos]) if is_tight else 9\n                total = 0\n                for digit in range(limit + 1):\n                    new_is_tight = is_tight and digit == limit\n                    total = (total + dfs(pos + 1, new_is_tight, current_sum + digit)) % MOD\n                return total\n            \n            return dfs(0, True, 0)\n        \n        return (count_up_to(num2, max_sum) - count_up_to(str(int(num1) - 1), max_sum) + MOD) % MOD\n\n# Reading input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\n\nnum1 = data[0]\nnum2 = data[1]\nmin_sum = int(data[2])\nmax_sum = int(data[3])\n\nsolution = Solution()\nresult = solution.count(num1, num2, min_sum, max_sum)\n\n# Printing the result to standard output\nprint(result)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2777",
+      "question_title": "find-the-distinct-difference-array",
+      "difficulty": "easy",
+      "latency_sec": 11.27,
+      "tokens": 241,
+      "code": "from typing import List\n\nclass Solution:\n    def distinctDifferenceArray(self, nums: List[int]) -> List[int]:\n        n = len(nums)\n        prefix_distinct = [0] * n\n        suffix_distinct = [0] * n\n        \n        # Calculate distinct elements in the prefix\n        seen = set()\n        for i in range(n):\n            seen.add(nums[i])\n            prefix_distinct[i] = len(seen)\n        \n        # Calculate distinct elements in the suffix\n        seen.clear()\n        for i in range(n - 1, -1, -1):\n            suffix_distinct[i] = len(seen)\n            seen.add(nums[i])\n        \n        # Calculate the distinct difference array\n        diff = [prefix_distinct[i] - suffix_distinct[i] for i in range(n)]\n        \n        return diff\n\n# Example usage:\nif __name__ == \"__main__\":\n    import sys\n    input = sys.stdin.read\n    data = input().split()\n    nums = list(map(int, data))\n    solution = Solution()\n    result = solution.distinctDifferenceArray(nums)\n    print(\" \".join(map(str, result)))",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2779",
+      "question_title": "number-of-adjacent-elements-with-the-same-color",
+      "difficulty": "medium",
+      "latency_sec": 10.5,
+      "tokens": 212,
+      "code": "class Solution:\n    def colorTheArray(self, n: int, queries: List[List[int]]) -> List[int]:\n        nums = [0] * n\n        answer = []\n        adjacent_count = 0\n\n        for index, color in queries:\n            if nums[index] != 0:\n                # Check the left neighbor\n                if index > 0 and nums[index] == nums[index - 1]:\n                    adjacent_count -= 1\n                # Check the right neighbor\n                if index < n - 1 and nums[index] == nums[index + 1]:\n                    adjacent_count -= 1\n\n            nums[index] = color\n\n            # Check the left neighbor\n            if index > 0 and nums[index] == nums[index - 1]:\n                adjacent_count += 1\n            # Check the right neighbor\n            if index < n - 1 and nums[index] == nums[index + 1]:\n                adjacent_count += 1\n\n            answer.append(adjacent_count)\n\n        return answer",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2784",
+      "question_title": "power-of-heroes",
+      "difficulty": "hard",
+      "latency_sec": 10.54,
+      "tokens": 209,
+      "code": "from typing import List\n\nclass Solution:\n    def sumOfPower(self, nums: List[int]) -> int:\n        MOD = 10**9 + 7\n        nums.sort()\n        total_power = 0\n        prefix_sum = 0\n        \n        for i in range(len(nums)):\n            # Calculate the power of groups ending at index i\n            total_power += (nums[i] ** 2) * (prefix_sum + nums[i])\n            total_power %= MOD\n            \n            # Update the prefix sum for the next iteration\n            prefix_sum = (2 * prefix_sum + nums[i]) % MOD\n        \n        return total_power\n\n# Example usage:\n# Read input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\nnums = list(map(int, data))\n\n# Create an instance of the Solution class and call the sumOfPower method\nsolution = Solution()\nresult = solution.sumOfPower(nums)\n\n# Print the result to standard output\nprint(result)",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2785",
+      "question_title": "semi-ordered-permutation",
+      "difficulty": "easy",
+      "latency_sec": 10.08,
+      "tokens": 194,
+      "code": "from typing import List\n\nclass Solution:\n    def semiOrderedPermutation(self, nums: List[int]) -> int:\n        n = len(nums)\n        pos_1 = nums.index(1)\n        pos_n = nums.index(n)\n        \n        # Calculate the number of swaps needed\n        swaps = pos_1 + (n - 1 - pos_n)\n        \n        # If 1 is to the right of n, we have counted one swap too many\n        if pos_1 > pos_n:\n            swaps -= 1\n        \n        return swaps\n\n# Read input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\n\n# Convert input data to integers\nnums = list(map(int, data))\n\n# Create an instance of the Solution class and call the method\nsolution = Solution()\nresult = solution.semiOrderedPermutation(nums)\n\n# Print the result to standard output\nprint(result)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2786",
+      "question_title": "find-the-longest-semi-repetitive-substring",
+      "difficulty": "medium",
+      "latency_sec": 8.73,
+      "tokens": 168,
+      "code": "class Solution:\n    def longestSemiRepetitiveSubstring(self, s: str) -> int:\n        max_length = 1\n        start = 0\n        consecutive_pairs = 0\n\n        for end in range(1, len(s)):\n            if s[end] == s[end - 1]:\n                consecutive_pairs += 1\n            \n            while consecutive_pairs > 1:\n                if s[start] == s[start + 1]:\n                    consecutive_pairs -= 1\n                start += 1\n            \n            max_length = max(max_length, end - start + 1)\n        \n        return max_length\n\n# Example usage:\nif __name__ == \"__main__\":\n    import sys\n    solution = Solution()\n    print(solution.longestSemiRepetitiveSubstring(sys.stdin.read().strip()))",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15
+    },
+    {
+      "question_id": "2791",
+      "question_title": "find-the-losers-of-the-circular-game",
+      "difficulty": "easy",
+      "latency_sec": 10.65,
+      "tokens": 190,
+      "code": "from typing import List\n\nclass Solution:\n    def circularGameLosers(self, n: int, k: int) -> List[int]:\n        visited = [False] * n\n        current = 0\n        i = 1\n        \n        while not visited[current]:\n            visited[current] = True\n            current = (current + i * k) % n\n            i += 1\n        \n        losers = [i + 1 for i in range(n) if not visited[i]]\n        return losers\n\n# Reading input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().split()\n\nn = int(data[0])\nk = int(data[1])\n\n# Creating an instance of the Solution class and calling the method\nsolution = Solution()\nresult = solution.circularGameLosers(n, k)\n\n# Printing the result to standard output\nprint(\" \".join(map(str, result)))",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2792",
+      "question_title": "neighboring-bitwise-xor",
+      "difficulty": "medium",
+      "latency_sec": 3.81,
+      "tokens": 51,
+      "code": "from typing import List\n\nclass Solution:\n    def doesValidArrayExist(self, derived: List[int]) -> bool:\n        # Check if the XOR of all elements in derived is 0\n        return not any(derived)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2800",
+      "question_title": "minimum-string-length-after-removing-substrings",
+      "difficulty": "easy",
+      "latency_sec": 7.4,
+      "tokens": 140,
+      "code": "class Solution:\n    def minLength(self, s: str) -> int:\n        stack = []\n        for char in s:\n            if stack and ((char == 'B' and stack[-1] == 'A') or (char == 'D' and stack[-1] == 'C')):\n                stack.pop()\n            else:\n                stack.append(char)\n        return len(stack)\n\n# Reading input from standard input\nimport sys\ninput = sys.stdin.read().strip()\n\n# Creating an instance of the Solution class\nsolution = Solution()\n\n# Calling the minLength method with the input string\nresult = solution.minLength(input)\n\n# Printing the result to standard output\nprint(result)",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    },
+    {
+      "question_id": "2802",
+      "question_title": "find-the-punishment-number-of-an-integer",
+      "difficulty": "medium",
+      "latency_sec": 10.1,
+      "tokens": 194,
+      "code": "class Solution:\n    def punishmentNumber(self, n: int) -> int:\n        def can_partition(s, target):\n            if not s:\n                return target == 0\n            for i in range(1, len(s) + 1):\n                if int(s[:i]) <= target and can_partition(s[i:], target - int(s[:i])):\n                    return True\n            return False\n\n        punishment_sum = 0\n        for i in range(1, n + 1):\n            if can_partition(str(i * i), i):\n                punishment_sum += i * i\n        return punishment_sum\n\n# Read input from standard input\nimport sys\ninput = sys.stdin.read\ndata = input().strip()\nn = int(data)\n\n# Create an instance of the Solution class and call the method\nsolution = Solution()\nresult = solution.punishmentNumber(n)\n\n# Print the result to standard output\nprint(result)",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    }
+  ]
+}
