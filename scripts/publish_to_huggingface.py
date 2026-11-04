@@ -146,6 +146,28 @@ def publish(
             commit_message="docs: add 46.0% Pass@1 standard baseline 50-problem LiveCodeBench results",
         )
 
+    lcb_remediation_path = "./tests/lcb_failed_19_remediation_results.json"
+    if os.path.isfile(lcb_remediation_path):
+        print("📊 Uploading Adaptive Routing & Remediation Benchmark (76.0% Pass@1) Results...")
+        api.upload_file(
+            path_or_fileobj=lcb_remediation_path,
+            path_in_repo="lcb_failed_19_remediation_results.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add adaptive routing and runtime arbitration remediation results (76% Pass@1)",
+        )
+
+    lcb_s_star_path = "./tests/lcb_s_star_arbitration_results.json"
+    if os.path.isfile(lcb_s_star_path):
+        print("📊 Uploading Berkeley S* Arbitration Results...")
+        api.upload_file(
+            path_or_fileobj=lcb_s_star_path,
+            path_in_repo="lcb_s_star_arbitration_results.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add Berkeley S* arbitration results",
+        )
+
     # Step 4: Scan and upload model weights (.gguf / .safetensors)
     if not os.path.isdir(model_dir):
         print(f"⚠️ Model directory '{model_dir}' does not exist.")
