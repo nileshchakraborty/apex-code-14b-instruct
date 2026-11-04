@@ -1,0 +1,53 @@
+{
+  "timestamp": "2026-11-04T01:45:02Z",
+  "hardware": {
+    "initial_memory": {
+      "used_gb": 22.73,
+      "total_gb": 36.0,
+      "percent": 86.7,
+      "swap_used_mb": 0.0
+    },
+    "final_memory": {
+      "used_gb": 22.66,
+      "total_gb": 36.0,
+      "percent": 87.8,
+      "swap_used_mb": 0.0
+    }
+  },
+  "tests": {
+    "router_health": {
+      "passed": true,
+      "health_data": {
+        "status": "healthy",
+        "router": "Apex Unified Gateway",
+        "system_ram_used_gb": 22.73,
+        "system_ram_total_gb": 36.0
+      },
+      "models_count": 3
+    },
+    "coder_syntax_validation": {
+      "passed": true,
+      "ast_valid": true,
+      "latency_sec": 10.65,
+      "tokens": 246
+    },
+    "thinker_logic_validation": {
+      "passed": true,
+      "logic_sound": true,
+      "latency_sec": 31.93,
+      "tokens": 995
+    },
+    "router_dispatch": {
+      "passed": true,
+      "code_routed_to": "apex-coder-14b",
+      "think_routed_to": "apex-think-14b"
+    },
+    "memory_safety": {
+      "passed": true,
+      "final_ram_used_gb": 22.66,
+      "swap_used_mb": 0.0,
+      "swap_safe": true
+    }
+  },
+  "overall_status": "ALL_PASSED"
+}
