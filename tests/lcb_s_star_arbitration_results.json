@@ -1,0 +1,135 @@
+{
+  "target_problems": [
+    "1873_A",
+    "1873_B",
+    "1883_B",
+    "1899_A",
+    "1899_D",
+    "2784"
+  ],
+  "passed_count": 3,
+  "total_target": 6,
+  "pass_rate": 50.0,
+  "problems": [
+    {
+      "question_id": "1873_A",
+      "question_title": "A. Short Sort",
+      "difficulty": "easy",
+      "latency_sec": 16.43,
+      "tokens": 510,
+      "arbitration_meta": {
+        "winner_label": "A (Occam's Simplicity)",
+        "reason": "Both produced identical output 'YES\nYES\nYES'; picked simpler AST (A=5 vs B=5)",
+        "diverged": true,
+        "test_input": "3\nabc\nacb\nbac",
+        "stdout_a": null,
+        "stdout_b": null,
+        "judge_verdict": null
+      },
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    t = int(input_data[0])\n    results = []\n\n    for i in range(1, t + 1):\n        cards = input_data[i]\n        if cards == \"abc\":\n            results.append(\"YES\")\n        elif cards in [\"acb\", \"bac\", \"bca\", \"cab\", \"cba\"]:\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n\n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1873_B",
+      "question_title": "B. Good Kid",
+      "difficulty": "easy",
+      "latency_sec": 41.86,
+      "tokens": 769,
+      "arbitration_meta": {
+        "winner_label": "A (Judge Output Verdict)",
+        "reason": "Judge evaluated distinct outputs (A: '1\n432\n430467210' vs B: '0\n432\n430467210') -> A (Judge Output Verdict)",
+        "diverged": true,
+        "test_input": "3\n1\n0\n5\n4 3 2 3 4\n9\n9 9 9 9 9 9 9 9 9",
+        "stdout_a": "1\n432\n430467210",
+        "stdout_b": "0\n432\n430467210",
+        "judge_verdict": "Let's analyze each test case step-by-step to determine the correct output.\n\n### Test Case 1:\n- **Input:** \n  - Number of digits, \\( n = 1 \\)\n  - Digits: \\( 0 \\)\n\n- **Logic:**\n  - We can add 1 to the digit 0, making it 1.\n  - The product of the digits is now \\( 1 \\).\n\n- **Expected Output:** \n  - \\( 1 \\)\n\n### Test Case 2:\n- **Input:** \n  - Number of digits, \\( n = 5 \\)\n  - Digits: \\( 4, 3, 2, 3, 4 \\)\n\n- **Logic:**\n  - We need to add 1 to one of the digits to maximize the product.\n  - Adding 1 to the digit 4 (the largest digit) results in \\( 5 \\).\n  - The new digits are \\( 5, 3, 2, 3, 4 \\).\n  - The product is \\( 5 \\times 3 \\times 2 \\times 3 \\times 4 = 360 \\).\n\n- **Expected Output:** \n  - \\( 360 \\)\n\n### Test Case 3:\n- **Input:** \n  - Number of digits, \\( n = 9 \\)\n  - Digits: \\( 9, 9, 9, 9, 9, 9, 9, 9, 9 \\)\n\n- **Logic:**\n  - We need to add 1 to one of the digits to maximize the product.\n  - Adding 1 to any digit 9 results in \\( 10 \\).\n  - The new digits are \\( 10, 9, 9, 9, 9, 9, 9, 9, 9 \\).\n  - The product is \\( 10 \\times 9^8 = 430467210 \\).\n\n- **Expected Output:** \n  - \\( 430467210 \\)\n\n### Comparison of Outputs:\n- **Output A:**\n  - Test Case 1: \\( 1 \\) (Correct)\n  - Test Case 2: \\( 432 \\) (Incorrect, should be \\( 360 \\))\n  - Test Case 3: \\( 43046721"
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        index += 1\n        \n        digits = list(map(int, input[index:index + n]))\n        index += n\n        \n        max_product = 0\n        \n        for i in range(n):\n            new_digits = digits[:]\n            new_digits[i] += 1\n            product = 1\n            for digit in new_digits:\n                product *= digit\n            if product > max_product:\n                max_product = product\n        \n        results.append(max_product)\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13
+    },
+    {
+      "question_id": "1883_B",
+      "question_title": "B. Chemistry",
+      "difficulty": "medium",
+      "latency_sec": 46.43,
+      "tokens": 901,
+      "arbitration_meta": {
+        "winner_label": "B (Judge Output Verdict)",
+        "reason": "Judge evaluated distinct outputs (A: 'YES\nYES\nYES' vs B: 'YES\nNO\nNO') -> B (Judge Output Verdict)",
+        "diverged": true,
+        "test_input": "3\n1 0\na\n2 1\nab\n3 2\nabc",
+        "stdout_a": "YES\nYES\nYES",
+        "stdout_b": "YES\nNO\nNO",
+        "judge_verdict": "Let's analyze each test case step-by-step to determine if it is possible to remove exactly \\( k \\) characters from the string \\( s \\) such that the remaining characters can be rearranged to form a palindrome.\n\n### Test Case 1:\n- **Input:** \\( n = 1 \\), \\( k = 0 \\), \\( s = \"a\" \\)\n- **Logic:** \n  - The string \"a\" is already a palindrome.\n  - Removing 0 characters leaves the string unchanged, which remains a palindrome.\n- **Output:** YES\n\n### Test Case 2:\n- **Input:** \\( n = 2 \\), \\( k = 1 \\), \\( s = \"ab\" \\)\n- **Logic:**\n  - To form a palindrome, we need either \"aa\" or \"bb\".\n  - Removing one character from \"ab\" results in either \"a\" or \"b\", neither of which is a palindrome.\n- **Output:** NO\n\n### Test Case 3:\n- **Input:** \\( n = 3 \\), \\( k = 2 \\), \\( s = \"abc\" \\)\n- **Logic:**\n  - To form a palindrome, we need either \"aa\", \"bb\", or \"cc\".\n  - Removing two characters from \"abc\" results in either \"a\", \"b\", or \"c\", none of which is a palindrome.\n- **Output:** NO\n\n### Comparison with Outputs:\n- **Output A:**\n  - Test Case 1: YES\n  - Test Case 2: YES\n  - Test Case 3: YES\n- **Output B:**\n  - Test Case 1: YES\n  - Test Case 2: NO\n  - Test Case 3: NO\n\n### Conclusion:\n- Output A is incorrect for Test Cases 2 and 3.\n- Output B is correct for all test cases.\n\n**FINAL DECISION: WINNER B**"
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        k = int(input[index + 1])\n        s = input[index + 2]\n        index += 3\n        \n        if n == 1:\n            results.append(\"YES\")\n            continue\n        \n        freq = [0] * 26\n        for char in s:\n            freq[ord(char) - ord('a')] += 1\n        \n        odd_count = sum(1 for count in freq if count % 2 != 0)\n        \n        if odd_count <= 1:\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n    \n    print(\"\\n\".join(results))\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "1899_A",
+      "question_title": "A. Game with Integers",
+      "difficulty": "easy",
+      "latency_sec": 46.34,
+      "tokens": 734,
+      "arbitration_meta": {
+        "winner_label": "A (Judge Output Verdict)",
+        "reason": "Judge evaluated distinct outputs (A: 'First\nFirst\nSecond' vs B: 'First\nFirst\nFirst') -> A (Judge Output Verdict)",
+        "diverged": true,
+        "test_input": "3\n1\n2\n3",
+        "stdout_a": "First\nFirst\nSecond",
+        "stdout_b": "First\nFirst\nFirst",
+        "judge_verdict": "Let's analyze the problem step-by-step for the given test input:\n\n### Test Input:\n```text\n3\n1\n2\n3\n```\n\n### Step-by-Step Analysis:\n\n#### Test Case 1: \\( n = 1 \\)\n- **Initial State**: \\( n = 1 \\)\n- **Vanya's Turn**: Vanya can add 1 to make \\( n = 2 \\) or subtract 1 to make \\( n = 0 \\).\n  - If Vanya adds 1, \\( n = 2 \\).\n  - If Vanya subtracts 1, \\( n = 0 \\) (Vanya wins immediately).\n\nSince Vanya can win immediately by subtracting 1, **Vanya wins**.\n\n#### Test Case 2: \\( n = 2 \\)\n- **Initial State**: \\( n = 2 \\)\n- **Vanya's Turn**: Vanya can add 1 to make \\( n = 3 \\) or subtract 1 to make \\( n = 1 \\).\n  - If Vanya adds 1, \\( n = 3 \\) (Vanya wins immediately).\n  - If Vanya subtracts 1, \\( n = 1 \\).\n\nSince Vanya can win immediately by adding 1, **Vanya wins**.\n\n#### Test Case 3: \\( n = 3 \\)\n- **Initial State**: \\( n = 3 \\)\n- **Vanya's Turn**: Vanya can add 1 to make \\( n = 4 \\) or subtract 1 to make \\( n = 2 \\).\n  - If Vanya adds 1, \\( n = 4 \\).\n  - If Vanya subtracts 1, \\( n = 2 \\).\n\nSince neither move makes \\( n \\) divisible by 3 immediately, we need to consider further moves:\n- **Vova's Turn**: Vova can add 1 to make \\( n = 5 \\) or subtract 1 to make \\( n = 1 \\).\n  - If Vova adds 1, \\( n = 5 \\).\n  - If Vova subtracts 1, \\( n = 1 \\).\n\nSince neither move makes \\( n \\) divisible by 3 immediately, we need to consider further moves:\n- **Vanya's Turn**: Vanya can add 1 to make \\( n = 6 \\) or subtract 1 to make \\( n = 4 \\).\n  - If"
+      },
+      "code": "import sys\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        index += 1\n        \n        # Determine the winner based on the rules\n        if (n + 1) % 3 == 0 or (n - 1) % 3 == 0:\n            results.append(\"First\")\n        else:\n            results.append(\"Second\")\n    \n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13
+    },
+    {
+      "question_id": "1899_D",
+      "question_title": "D. Yarik and Musical Notes",
+      "difficulty": "hard",
+      "latency_sec": 90.82,
+      "tokens": 1031,
+      "arbitration_meta": {
+        "winner_label": "A (Judge Output Verdict)",
+        "reason": "Judge evaluated distinct outputs (A: '0\n0\n1' vs B: '0\n1\n3') -> A (Judge Output Verdict)",
+        "diverged": true,
+        "test_input": "3\n1\n1\n2\n1 2\n3\n1 1 2",
+        "stdout_a": "0\n0\n1",
+        "stdout_b": "0\n1\n3",
+        "judge_verdict": "Let's analyze the problem step-by-step to determine which output is correct.\n\n### Problem Analysis\n\nGiven an array \\( a \\) of length \\( n \\), where each element \\( a_i \\) represents a note \\( b_i = 2^{a_i} \\), we need to count the number of pairs \\( (i, j) \\) such that \\( i < j \\) and \\( b_i^{b_j} = b_j^{b_i} \\).\n\n### Simplification\n\nThe condition \\( b_i^{b_j} = b_j^{b_i} \\) can be rewritten using the properties of exponents:\n\\[ (2^{a_i})^{2^{a_j}} = (2^{a_j})^{2^{a_i}} \\]\nThis simplifies to:\n\\[ 2^{a_i \\cdot 2^{a_j}} = 2^{a_j \\cdot 2^{a_i}} \\]\n\nFor the equality to hold, the exponents must be equal:\n\\[ a_i \\cdot 2^{a_j} = a_j \\cdot 2^{a_i} \\]\n\nThis equation holds if and only if \\( a_i = a_j \\) or \\( a_i = 1 \\) and \\( a_j = 0 \\) (which is not possible since \\( a_i \\geq 1 \\)).\n\nThus, we need to count the number of pairs \\( (i, j) \\) such that \\( a_i = a_j \\).\n\n### Implementation Steps\n\n1. **Count Frequencies**: Count the frequency of each unique value in the array \\( a \\).\n2. **Calculate Pairs**: For each unique value with frequency \\( f \\), the number of pairs is given by the combination formula \\( \\binom{f}{2} = \\frac{f(f-1)}{2} \\).\n\n### Test Input Analysis\n\nLet's analyze the provided test input step-by-step:\n\n#### Test Case 1\nInput:\n```\n3\n1\n1\n2\n1 2\n3\n1 1 2\n```\n\n**Step-by-Step Calculation:**\n\n1. **Test Case 1:**\n   - Array: \\( [1] \\)\n   - Frequencies: \\( \\{1: 1\\} \\)\n   - Pairs: \\( \\binom{1}{2} = 0 \\)\n\n2. **Test Case 2:**\n   - Array: \\( [1, 2] \\"
+      },
+      "code": "import sys\nfrom collections import Counter\n\ndef solve():\n    import sys\n    input = sys.stdin.read().split()\n    \n    index = 0\n    t = int(input[index])\n    index += 1\n    \n    results = []\n    \n    for _ in range(t):\n        n = int(input[index])\n        index += 1\n        \n        a = list(map(int, input[index:index + n]))\n        index += n\n        \n        # Count the occurrences of each value in a\n        count = Counter(a)\n        \n        # Calculate the number of valid pairs\n        valid_pairs = 0\n        for k, v in count.items():\n            if v > 1:\n                # Number of ways to choose 2 items from v items\n                valid_pairs += v * (v - 1) // 2\n        \n        results.append(valid_pairs)\n    \n    # Print all results\n    for result in results:\n        print(result)\n\nif __name__ == '__main__':\n    solve()",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    },
+    {
+      "question_id": "2784",
+      "question_title": "power-of-heroes",
+      "difficulty": "hard",
+      "latency_sec": 43.54,
+      "tokens": 919,
+      "arbitration_meta": {
+        "winner_label": "A (Occam's Complexity)",
+        "reason": "Function-level problem: chose lower AST complexity (A=2 vs B=2)",
+        "diverged": true,
+        "test_input": null,
+        "stdout_a": null,
+        "stdout_b": null,
+        "judge_verdict": null
+      },
+      "code": "import sys\nfrom typing import List\n\nclass Solution:\n    def sumOfPower(self, nums: List[int]) -> int:\n        MOD = 10**9 + 7\n        nums.sort()\n        total_power = 0\n        prefix_sum = 0\n        \n        for i, num in enumerate(nums):\n            # Calculate the contribution of the current number as the maximum\n            max_contribution = (num * num % MOD * (prefix_sum + num) % MOD) % MOD\n            total_power = (total_power + max_contribution) % MOD\n            \n            # Update the prefix sum to include the current number\n            prefix_sum = (prefix_sum * 2 + num) % MOD\n        \n        return total_power\n\ndef solve():\n    input = sys.stdin.read().split()\n    n = int(input[0])\n    nums = list(map(int, input[1:]))\n    solution = Solution()\n    print(solution.sumOfPower(nums))\n\nif __name__ == '__main__':\n    solve()",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14
+    }
+  ]
+}
