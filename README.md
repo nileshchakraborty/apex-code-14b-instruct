@@ -240,6 +240,8 @@ llama-server \
 
 For replicating this model creation, behavioral conditioning, and hardware optimization (Mac Metal, Intel/AMD Vulkan, ARM64) on any new model family:
 - **[Replication Transcript (Turnkey Agent Prompt & Runbook)](REPLICATION_TRANSCRIPT.md)**: Ready to paste into a new agent session.
+- **[Autonomous Agent Specification](.agents/agents/universal-model-builder.md)**: Specialized agent configuration for model building and optimization.
+- **[Universal Model Builder Skill](.agents/skills/universal-model-builder/SKILL.md)**: Executable skill runbook with hardware matrix and presets.
 - **[Universal Engineering Blueprint](docs/universal_model_creation_optimization_and_testing_blueprint.md)**: In-depth technical architecture, memory bandwidth formulas, zero-contamination AST linting, and DiffCodeGen clustering specifications.
 
 ---
