@@ -40,14 +40,28 @@ SYNONYMS = {
     "tfe": "time limit exceeded",
     "mle": "memory limit exceeded",
     "wa": "wrong answer",
-    "rte": "runtime error"
+    "rte": "runtime error",
+    "compute": "calculate",
+    "find": "calculate",
+    "determine": "calculate"
 }
+
+
+def stem_token(t: str) -> str:
+    """Lightweight rule-based morphological normalization for code queries."""
+    if t.endswith("ies") and len(t) > 4:
+        return t[:-3] + "y"
+    elif t.endswith("es") and len(t) > 4:
+        return t[:-2]
+    elif t.endswith("s") and not t.endswith("ss") and len(t) > 3:
+        return t[:-1]
+    return t
 
 
 class LocalFastEmbedder:
     """
     High-speed deterministic token & character n-gram hash embedder with L2 normalization.
-    Uses stopword de-emphasis, synonym canonicalization, and n-gram hashing.
+    Uses stopword de-emphasis, synonym canonicalization, token stemming, and n-gram hashing.
     Computes dense embeddings (dim=384) in <0.2ms.
     """
     def __init__(self, dim: int = 384):
@@ -56,16 +70,18 @@ class LocalFastEmbedder:
     def embed(self, text: str) -> np.ndarray:
         clean_text = text.lower().strip()
         for k, v in SYNONYMS.items():
-            clean_text = clean_text.replace(k, v)
+            clean_text = re_sub(r"\b" + k + r"\b", v, clean_text)
 
         vec = np.zeros(self.dim, dtype=np.float32)
         if not clean_text:
             return vec
 
-        # Tokens
-        tokens = [t for t in re_split(r"[^\w\.\-\_]", clean_text) if t]
+        # Tokens with stemming
+        raw_tokens = [t for t in re_split(r"[^\w\.\-\_]", clean_text) if t]
+        tokens = [stem_token(t) for t in raw_tokens]
+
         for i, token in enumerate(tokens):
-            weight = 0.4 if token in STOPWORDS else 3.0
+            weight = 0.2 if token in STOPWORDS else 4.0
             h = hash_str(token) % self.dim
             vec[h] += weight
 
@@ -73,13 +89,13 @@ class LocalFastEmbedder:
             if i + 1 < len(tokens):
                 bi = f"{token}_{tokens[i+1]}"
                 h_bi = hash_str(bi) % self.dim
-                vec[h_bi] += 1.5
+                vec[h_bi] += 2.0
 
         # Character 3-grams for morphology and sub-tokens
         for i in range(len(clean_text) - 2):
             gram = clean_text[i:i+3]
             h = hash_str(gram) % self.dim
-            vec[h] += 0.5
+            vec[h] += 0.3
 
         norm = np.linalg.norm(vec)
         if norm > 1e-9:
@@ -90,6 +106,11 @@ class LocalFastEmbedder:
 def re_split(pattern: str, text: str) -> List[str]:
     import re
     return re.split(pattern, text)
+
+
+def re_sub(pattern: str, repl: str, text: str) -> str:
+    import re
+    return re.sub(pattern, repl, text)
 
 
 def hash_str(s: str) -> int:
