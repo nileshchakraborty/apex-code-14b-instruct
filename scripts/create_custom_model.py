@@ -53,6 +53,12 @@ MODEL_DOWNLOAD_MAP = {
     ("llama-3.2", "3b", "q4_k_m"): "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
     ("llama-3.2", "1b", "q4_k_m"): "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
     ("llama-3.1", "8b", "q5_k_m"): "https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q5_K_M.gguf",
+    # Codestral 22B (France, Mistral AI - Dedicated Code SOTA)
+    ("codestral", "22b", "q4_k_m"): "https://huggingface.co/bartowski/Codestral-22B-v0.1-GGUF/resolve/main/Codestral-22B-v0.1-Q4_K_M.gguf",
+    ("codestral", "22b", "q5_k_m"): "https://huggingface.co/bartowski/Codestral-22B-v0.1-GGUF/resolve/main/Codestral-22B-v0.1-Q5_K_M.gguf",
+    # StarCoder2 15B (USA/France, BigCode - Transparent Data, Apache/OpenRAIL)
+    ("starcoder2", "15b", "q5_k_m"): "https://huggingface.co/bartowski/starcoder2-15b-GGUF/resolve/main/starcoder2-15b-Q5_K_M.gguf",
+    ("starcoder2", "15b", "q4_k_m"): "https://huggingface.co/bartowski/starcoder2-15b-GGUF/resolve/main/starcoder2-15b-Q4_K_M.gguf",
     # Mistral Small 24B (France, Mistral AI - Apache 2.0)
     ("mistral", "24b", "q4_k_m"): "https://huggingface.co/bartowski/Mistral-Small-24B-Instruct-2501-GGUF/resolve/main/Mistral-Small-24B-Instruct-2501-Q4_K_M.gguf",
     ("mistral", "24b", "q5_k_m"): "https://huggingface.co/bartowski/Mistral-Small-24B-Instruct-2501-GGUF/resolve/main/Mistral-Small-24B-Instruct-2501-Q5_K_M.gguf",
