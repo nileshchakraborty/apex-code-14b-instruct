@@ -46,8 +46,17 @@ MODEL_DOWNLOAD_MAP = {
     ("qwen2.5-coder", "3b", "q4_k_m"): "https://huggingface.co/Qwen/Qwen2.5-Coder-3B-Instruct-GGUF/resolve/main/qwen2.5-coder-3b-instruct-q4_k_m.gguf",
     ("qwen2.5-coder", "1.5b", "q4_k_m"): "https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-1.5b-instruct-q4_k_m.gguf",
     ("qwen2.5-coder", "0.5b", "q8_0"): "https://huggingface.co/Qwen/Qwen2.5-Coder-0.5B-Instruct-GGUF/resolve/main/qwen2.5-coder-0.5b-instruct-q8_0.gguf",
-    # Llama 3.2
+    # Microsoft Phi-4 (USA, MIT License)
+    ("phi-4", "14b", "q5_k_m"): "https://huggingface.co/bartowski/phi-4-GGUF/resolve/main/phi-4-Q5_K_M.gguf",
+    ("phi-4", "14b", "q4_k_m"): "https://huggingface.co/bartowski/phi-4-GGUF/resolve/main/phi-4-Q4_K_M.gguf",
+    # Llama 3.2 & Llama 3.1 (USA, Meta)
     ("llama-3.2", "3b", "q4_k_m"): "https://huggingface.co/bartowski/Llama-3.2-3B-Instruct-GGUF/resolve/main/Llama-3.2-3B-Instruct-Q4_K_M.gguf",
+    ("llama-3.2", "1b", "q4_k_m"): "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
+    ("llama-3.1", "8b", "q5_k_m"): "https://huggingface.co/bartowski/Meta-Llama-3.1-8B-Instruct-GGUF/resolve/main/Meta-Llama-3.1-8B-Instruct-Q5_K_M.gguf",
+    # Mistral NeMo (France/USA, Apache 2.0)
+    ("mistral", "12b", "q5_k_m"): "https://huggingface.co/bartowski/Mistral-Nemo-Instruct-2407-GGUF/resolve/main/Mistral-Nemo-Instruct-2407-Q5_K_M.gguf",
+    # Google Gemma 2 (USA, Google)
+    ("gemma-2", "27b", "q4_k_m"): "https://huggingface.co/bartowski/gemma-2-27b-it-GGUF/resolve/main/gemma-2-27b-it-Q4_K_M.gguf",
     ("llama-3.2", "1b", "q4_k_m"): "https://huggingface.co/bartowski/Llama-3.2-1B-Instruct-GGUF/resolve/main/Llama-3.2-1B-Instruct-Q4_K_M.gguf",
 }
 
