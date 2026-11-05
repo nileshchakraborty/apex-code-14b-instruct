@@ -58,6 +58,14 @@ ollama run apex-coder-14b
 | **10K Needle-in-Haystack** | **100% Accuracy** | Deep context retrieval | Verified ✅ |
 | **Python AST Syntax Check** | **100% Valid AST** | Concurrency class with locks & type annotations | Verified ✅ |
 | **Logic & Fallacy Avoidance** | **Sound Consequence** | Correctly detects undistributed middle fallacy | Verified ✅ |
+
+### Cross-Hardware Benchmark: Bare-Metal Legacy Workstation (Intel Core i9-9880H + AMD Navi 14 GDDR6)
+
+| Configuration | Hardware Backend | Token Throughput | Wall-Clock (25 Problems) | Pass@1 Accuracy | Peak CPU Temp |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Docker CPU Baseline** | AVX2 Software | 1.30 tok/s | 42.4 minutes | 16.0% (4/25) | 90°C (Watchdog kill) |
+| **Zero-Shot Vulkan (7B)**| AMD Radeon Pro GDDR6 | 26.38 tok/s | 4.5 minutes | 28.0% (7/25) | 71°C (Safe) |
+| **ApexCode v1.2.0 (Optimized)** | AMD Navi 14 + AST Linter | **18.0 – 26.4 tok/s** | **5.6 minutes** | **32.0% (8/25)** | **72°C (Safe)** |
 | **Hardware Memory Footprint** | **20.60 GB / 36.0 GB** | **0.0 MB Swap Churn** (15+ GB buffer for OS & IDE) | Verified ✅ |
 | **ApexDeepCoder Adaptive Suite** | **100.0% (9 / 9)** | Outperforms 22.2% zero-shot 14B baseline on Hard Systems & Algorithms | Verified ✅ |
 | **LiveCodeBench Pass@1 (Standard 50p Zero-Shot)** | **46.0% (23 / 50)** | Vanilla prompt baseline (Easy 61.1%, Medium 39.1%, Hard 33.3%) | Baseline |
