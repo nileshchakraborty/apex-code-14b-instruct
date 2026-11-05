@@ -155,7 +155,12 @@ def query_calibrated_model(
 
 
 def extract_python_code(text: str) -> str:
-    """Extract code from ```python markdown fences or return raw text."""
+    """Extract code from ```python markdown fences or return raw text, stripping <think> traces."""
+    if "</think>" in text:
+        text = text.split("</think>")[-1].strip()
+    elif "<think>" in text:
+        text = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL).strip()
+
     if "```python" in text:
         match = re.search(r"```python\s*(.*?)\s*```", text, re.DOTALL)
         if match:

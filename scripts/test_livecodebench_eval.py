@@ -9,7 +9,9 @@ import time
 
 LIVECODEBENCH_DIR = "/Users/nileshchakraborty/workspace/LiveCodeBench"
 APEX_DIR = "/Users/nileshchakraborty/workspace/apex-code-36gb"
+MODEL_CREATOR_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+sys.path.insert(0, MODEL_CREATOR_DIR)
 sys.path.insert(0, LIVECODEBENCH_DIR)
 sys.path.insert(0, APEX_DIR)
 
@@ -20,6 +22,11 @@ from lcb_runner.lm_styles import LMStyle
 from scripts.deepcoder_pipeline import query_ollama, extract_code_block, CODE_MODEL
 from scripts.clean_decoding_pipeline import generate_clean_solution
 from scripts.unified_research_pipeline import generate_optimized_solution
+from scripts.recursive_task_scheduler import RecursiveTaskScheduler, CognitiveRouter, HardwareGovernor
+from scripts.epistemic_cache import EpistemicMemoryBus
+from scripts.car_analyzer import CARAnalyzer
+from scripts.epistemic_gap_arbiter import EpistemicGapArbiter
+import asyncio
 
 
 def main():
@@ -31,7 +38,7 @@ def main():
         "--pipeline",
         type=str,
         default="unified",
-        choices=["standard", "clean", "contracts", "unified"],
+        choices=["standard", "clean", "contracts", "unified", "recursive_swarm"],
         help="Inference pipeline architecture (default: unified)",
     )
     parser.add_argument(
@@ -58,12 +65,39 @@ def main():
     generations_list = []
     metadata_list = []
 
+    # Initialize Epistemic Swarm Engine
+    memory_bus = EpistemicMemoryBus()
+    scheduler = RecursiveTaskScheduler(memory_bus=memory_bus)
+    arbiter = EpistemicGapArbiter(memory_bus=memory_bus)
+
     t_start_total = time.perf_counter()
 
     for idx, prob in enumerate(test_slice, 1):
         print(f"[{idx}/{len(test_slice)}] {prob.question_id}: {prob.question_title} ({prob.difficulty.value})")
 
-        if args.pipeline == "unified":
+        if args.pipeline == "recursive_swarm":
+            t_prob_start = time.perf_counter()
+            def local_gen(prompt):
+                r = generate_clean_solution(
+                    problem_text=prompt,
+                    starter_code=prob.starter_code,
+                    mode=args.mode,
+                    use_ast_contracts=False,
+                    is_competitive_io=True
+                )
+                return r.get("code", "")
+
+            swarm_res = asyncio.run(scheduler.execute_task(
+                task_spec=prob.question_content,
+                mode="auto",
+                code_generator=local_gen
+            ))
+            raw_code = swarm_res.get("code", "")
+            synth_res = arbiter.synthesize_and_verify(raw_code, prob.question_content)
+            code = synth_res.get("code", raw_code)
+            latency = round(time.perf_counter() - t_prob_start, 2)
+            tokens = len(code.split())
+        elif args.pipeline == "unified":
             res = generate_optimized_solution(
                 problem_text=prob.question_content,
                 starter_code=prob.starter_code,
@@ -197,6 +231,7 @@ def main():
             "evaluation_sec": eval_duration,
             "total_sec": total_generation_time + eval_duration,
         },
+        "telemetry": memory_bus.get_telemetry(),
         "problems": detailed_problems,
     }
     with open(out_file, "w") as f:

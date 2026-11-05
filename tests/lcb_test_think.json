@@ -1,0 +1,53 @@
+{
+  "benchmark": "LiveCodeBench",
+  "model": "apex-code-14b-instruct",
+  "pipeline": "recursive_swarm",
+  "decoding_mode": "greedy",
+  "problem_count": 1,
+  "overall_pass_at_1": 0.0,
+  "difficulty_breakdown": {
+    "easy": [
+      0,
+      1
+    ],
+    "medium": [
+      0,
+      0
+    ],
+    "hard": [
+      0,
+      0
+    ]
+  },
+  "timing": {
+    "generation_sec": 16.32,
+    "evaluation_sec": 1.93,
+    "total_sec": 18.25
+  },
+  "telemetry": {
+    "total_queries": 0,
+    "cache_hits": 0,
+    "cache_misses": 0,
+    "triples_stored": 0,
+    "ppr_queries": 0,
+    "tickets_issued": 0,
+    "tickets_resolved": 0,
+    "active_kg_nodes": 0,
+    "active_kg_edges": 0,
+    "redundancy_prevented_pct": 0.0,
+    "open_tickets": 0
+  },
+  "problems": [
+    {
+      "question_id": "1873_A",
+      "question_title": "A. Short Sort",
+      "difficulty": "easy",
+      "latency_sec": 16.32,
+      "tokens": 0,
+      "code": "",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1
+    }
+  ]
+}

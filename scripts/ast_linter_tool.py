@@ -125,6 +125,34 @@ Static Analysis Violations:
 Please fix these exact violations and provide the corrected complete Python 3 solution inside ```python ```."""
     return repair_prompt
 
+class KarpathyASTLinter:
+    """Object-oriented wrapper for Karpathy Software 3.0 deterministic AST auditing and repairs."""
+    def __init__(self):
+        pass
+
+    def lint_python_code(self, code: str) -> Dict[str, Any]:
+        res = audit_code(code)
+        issues = [v.get("message", "") for v in res.get("violations", [])]
+        return {
+            "valid": res["valid"],
+            "issues": issues,
+            "violations": res.get("violations", [])
+        }
+
+    def attempt_repair(self, code: str, issues: List[str]) -> str:
+        # Deterministic line-level transformations for common Type A surface defects
+        repaired = code
+        # 1. Missing math import
+        if any("math" in iss for iss in issues) and "import math" not in repaired:
+            repaired = "import math\n" + repaired
+        # 2. Missing sys import
+        if any("sys" in iss for iss in issues) and "import sys" not in repaired:
+            repaired = "import sys\n" + repaired
+        # 3. Float division in indexing
+        repaired = re.sub(r"\[(\w+)\s*/\s*(\w+)\]", r"[\1 // \2]", repaired)
+        return repaired
+
+
 if __name__ == "__main__":
     test_buggy_code = """import sys
 
