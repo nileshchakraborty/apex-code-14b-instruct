@@ -244,6 +244,14 @@ llama-server \
 
 ---
 
+## 🌐 Universal Replication & Multi-Hardware Blueprints
+
+For replicating this model creation, behavioral conditioning, and hardware optimization (Mac Metal, Intel/AMD Vulkan, ARM64) on any new model family:
+- **[Replication Transcript (Turnkey Agent Prompt & Runbook)](https://github.com/nileshchakraborty/apex-code-14b-instruct/blob/main/REPLICATION_TRANSCRIPT.md)**: Ready to paste into a new agent session.
+- **[Universal Engineering Blueprint](https://github.com/nileshchakraborty/apex-code-14b-instruct/blob/main/docs/universal_model_creation_optimization_and_testing_blueprint.md)**: In-depth technical architecture, memory bandwidth formulas, zero-contamination AST linting, and DiffCodeGen clustering specifications.
+
+---
+
 ## 📜 Citation & Credits
 - Base Model: [Qwen2.5-Coder-14B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-14B-Instruct) by the Qwen Team.
 - Optimization & Serving Pipeline: [ApexCode-14B-Instruct](https://github.com/nileshchakraborty/apex-code-14b-instruct) by Nilesh Chakraborty.
