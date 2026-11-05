@@ -10,6 +10,7 @@ Provides:
 
 import ast
 import json
+import os
 import re
 import sys
 import time
@@ -22,16 +23,19 @@ try:
         verify_contract_coverage,
     )
     from scripts.repo_graph_extractor import RepoGraphExtractor
+    from scripts.ast_linter_tool import audit_code, generate_tool_repair_prompt
 except ImportError:
     from ast_contract_compiler import (
         get_ast_contract_prompt_instruction,
         verify_contract_coverage,
     )
     from repo_graph_extractor import RepoGraphExtractor
+    from ast_linter_tool import audit_code, generate_tool_repair_prompt
 
-OLLAMA_API_URL = "http://127.0.0.1:11434/api/chat"
-CODE_MODEL = "apex-coder-14b"
-THINK_MODEL = "apex-think-14b"
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434")
+OLLAMA_API_URL = f"{OLLAMA_BASE_URL.rstrip('/')}/api/chat"
+CODE_MODEL = os.environ.get("CODE_MODEL", "apex-coder-14b")
+THINK_MODEL = os.environ.get("THINK_MODEL", "apex-think-14b")
 
 
 # ==============================================================================
@@ -67,44 +71,74 @@ def query_calibrated_model(
             "Output ONLY the complete solution inside a single ```python block."
         )
 
+    if num_ctx == 16384:
+        num_ctx = int(os.environ.get("OLLAMA_NUM_CTX", "4096"))
+    if max_tokens == 1536:
+        max_tokens = int(os.environ.get("MAX_TOKENS", "384"))
+
     options: Dict[str, Any] = {
         "num_predict": max_tokens,
         "num_ctx": num_ctx,
+        "num_batch": int(os.environ.get("OLLAMA_NUM_BATCH", "128")),
     }
+    if "OLLAMA_NUM_THREAD" in os.environ:
+        options["num_thread"] = int(os.environ["OLLAMA_NUM_THREAD"])
 
     if mode == "greedy":
         options["temperature"] = 0.0
-        options["top_p"] = 1.0
     elif mode == "calibrated":
         options["temperature"] = 0.2
         options["min_p"] = 0.05
-        options["top_p"] = 0.95
     else:
         options["temperature"] = 0.2
 
-    payload = {
-        "model": model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt},
-        ],
-        "stream": False,
-        "options": options,
-    }
+    is_openai = "/v1" in OLLAMA_BASE_URL or ":8080" in OLLAMA_BASE_URL or os.environ.get("API_STYLE") == "openai"
+    if is_openai:
+        if OLLAMA_BASE_URL.endswith("/v1/chat/completions") or OLLAMA_BASE_URL.endswith("/chat/completions"):
+            endpoint = OLLAMA_BASE_URL
+        elif OLLAMA_BASE_URL.endswith("/v1"):
+            endpoint = f"{OLLAMA_BASE_URL.rstrip('/')}/chat/completions"
+        else:
+            endpoint = f"{OLLAMA_BASE_URL.rstrip('/')}/v1/chat/completions"
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            "max_tokens": max_tokens,
+            "temperature": options.get("temperature", 0.0),
+        }
+    else:
+        endpoint = OLLAMA_API_URL
+        payload = {
+            "model": model,
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ],
+            "stream": False,
+            "options": options,
+            "keep_alive": -1,
+        }
 
     req = urllib.request.Request(
-        OLLAMA_API_URL,
+        endpoint,
         data=json.dumps(payload).encode("utf-8"),
         headers={"Content-Type": "application/json"},
     )
 
     t0 = time.perf_counter()
     try:
-        with urllib.request.urlopen(req, timeout=180) as resp:
+        with urllib.request.urlopen(req, timeout=300) as resp:
             data = json.loads(resp.read().decode("utf-8"))
             latency = time.perf_counter() - t0
-            content = data.get("message", {}).get("content", "")
-            tokens = data.get("eval_count", 0)
+            if is_openai:
+                content = data.get("choices", [{}])[0].get("message", {}).get("content", "")
+                tokens = data.get("usage", {}).get("completion_tokens", 0)
+            else:
+                content = data.get("message", {}).get("content", "")
+                tokens = data.get("eval_count", 0)
             return {
                 "content": content,
                 "tokens": tokens,
@@ -144,6 +178,7 @@ def generate_clean_solution(
     mode: str = "greedy",
     use_ast_contracts: bool = False,
     is_competitive_io: bool = True,
+    enable_ast_linter: bool = True,
 ) -> Dict[str, Any]:
     """Generate a clean zero-shot solution with optional AST contracts, repo context, and competitive scaffolding."""
     prompt_parts = []
@@ -170,7 +205,35 @@ def generate_clean_solution(
         model=CODE_MODEL,
     )
 
+    if res.get("error"):
+        print(f"❌ [DEBUG] query_calibrated_model error: {res.get('error')}")
+
     code = extract_python_code(res.get("content", ""))
+    total_tokens = res.get("tokens", 0)
+    total_latency = res.get("latency_sec", 0.0)
+    tool_repair_applied = False
+
+    # External Tool Call: Karpathy Software 3.0 deterministic AST linter
+    if enable_ast_linter and code:
+        audit_res = audit_code(code)
+        if not audit_res.get("valid", True):
+            repair_prompt = generate_tool_repair_prompt(code, audit_res)
+            repair_res = query_calibrated_model(
+                prompt=repair_prompt,
+                system_prompt="You are an expert algorithms engineer. Fix the logic and syntax defects identified in the tool report.",
+                mode="greedy",
+                model=CODE_MODEL,
+                max_tokens=res.get("tokens", 384) + 128,
+            )
+            repaired_code = extract_python_code(repair_res.get("content", ""))
+            try:
+                ast.parse(repaired_code)
+                code = repaired_code
+                tool_repair_applied = True
+                total_tokens += repair_res.get("tokens", 0)
+                total_latency += repair_res.get("latency_sec", 0.0)
+            except SyntaxError:
+                pass
 
     # Validate AST validity
     ast_valid = False
@@ -189,10 +252,12 @@ def generate_clean_solution(
         "code": code,
         "ast_valid": ast_valid,
         "ast_error": ast_error,
-        "latency_sec": res.get("latency_sec", 0.0),
-        "tokens": res.get("tokens", 0),
+        "latency_sec": round(total_latency, 2),
+        "tokens": total_tokens,
         "mode": mode,
+        "tool_repair_applied": tool_repair_applied,
         "contract_report": contract_report,
+        "error": res.get("error"),
     }
 
 

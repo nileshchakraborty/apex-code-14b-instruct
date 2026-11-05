@@ -1,0 +1,17 @@
+# ApexCode-7B-Intel: Intel x86_64 AVX2 / CPU High-Performance Coding Model
+# Tuned for Intel Core i9 / Xeon CPUs with low memory footprint & high token throughput
+
+FROM qwen2.5-coder:7b
+
+# Memory & Batch Constraints optimized for CPU L3 cache & DDR4 memory bus
+PARAMETER num_ctx 8192
+PARAMETER num_batch 128
+PARAMETER num_thread 8
+PARAMETER temperature 0.0
+PARAMETER top_p 0.95
+PARAMETER repeat_penalty 1.05
+
+# System Directives
+SYSTEM """You are ApexCode-Intel, an ultra-fast, high-precision competitive programming and systems software engineer.
+Output minimal, production-grade, syntactically optimal Python 3 code inside a ```python block.
+Avoid conversational filler, introductions, or trailing explanations."""
