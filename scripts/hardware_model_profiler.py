@@ -188,7 +188,15 @@ def compute_llm_recommendation(
     # 1. Apple Silicon macOS
     if has_metal and override_vram_gb is None:
         ram = total_ram_gb
-        if ram >= 64.0:
+        if ram >= 96.0:
+            target_tier = "70B"
+            target_quant = "Q5_K_M"
+            draft_tier = "8B"
+            draft_quant = "Q8_0"
+            ctx_size = 65536
+            est_tok_s = "20-35"
+            weight_gb = 48.5
+        elif ram >= 64.0:
             target_tier = "32B"
             target_quant = "Q5_K_M"
             draft_tier = "1.5B"
