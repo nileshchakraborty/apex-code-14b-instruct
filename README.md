@@ -239,6 +239,7 @@ llama-server \
 ## 🌐 Universal Replication & Multi-Hardware Blueprints
 
 For replicating this model creation, behavioral conditioning, and hardware optimization (Mac Metal, Intel/AMD Vulkan, ARM64) on any new model family:
+- **[Dedicated Model Creator Engine](https://github.com/nileshchakraborty/model-creator)**: Standalone repository for 1-command auto-profiling and model building.
 - **[Replication Transcript (Turnkey Agent Prompt & Runbook)](REPLICATION_TRANSCRIPT.md)**: Ready to paste into a new agent session.
 - **[Autonomous Agent Specification](.agents/agents/universal-model-builder.md)**: Specialized agent configuration for model building and optimization.
 - **[Universal Model Builder Skill](.agents/skills/universal-model-builder/SKILL.md)**: Executable skill runbook with hardware matrix and presets.
