@@ -1,35 +1,25 @@
 ---
 name: universal-model-builder
-description: Build, quantize, optimize, serve, condition, and benchmark any LLM family (Qwen, Llama, DeepSeek, Mistral, Gemma, Phi) across Mac (Apple Silicon Metal MPS), Intel/AMD x86_64 (Vulkan/AVX2), and Linux ARM64. Implements zero-contamination Karpathy Software 3.0 AST linting, DiffCodeGen behavioral clustering (arXiv:2605.20473), Docker sandbox execution, and automated GitHub/Hugging Face publishing.
+description: Build, quantize, optimize, serve, condition, and benchmark any LLM family (Qwen, Llama, DeepSeek, Mistral, Gemma, Phi) across Mac (Apple Silicon Metal MPS), Intel/AMD x86_64 (Vulkan/AVX2), and Linux ARM64. Implements dynamic hardware profiling (RAM/VRAM calculation), zero-contamination Karpathy Software 3.0 AST linting, DiffCodeGen behavioral clustering (arXiv:2605.20473), Docker sandbox execution, and automated GitHub/Hugging Face publishing.
 ---
 
 # 🌐 Universal Model Builder & Hardware Optimization Skill
 
-This skill provides an end-to-end engineering protocol to build, optimize, serve, condition, benchmark, and publish any model of any family across Apple Silicon (Metal), Intel/AMD x86_64 (Vulkan/AVX2), and Linux ARM64 environments.
+This skill provides an end-to-end engineering protocol to build, optimize, serve, condition, benchmark, and publish any model of any family across Apple Silicon (Metal), Intel/AMD x86_64 (Vulkan/AVX2), and Linux ARM64 environments. It dynamically adapts to arbitrary physical RAM and GPU VRAM capacities.
 
 ---
 
-## 🧭 Phase 1: Hardware Topology & Memory Budgeting
+## 🧭 Phase 1: Hardware Topology & Dynamic Memory Profiling
 
-### 1.1 Hardware Detection
-Detect the active host OS, GPU compute devices, and memory topology:
+### 1.1 Automated Profiler & Sizing Advisor
+Run the built-in hardware profiler to automatically measure your system's physical limits:
 
 ```bash
-ARCH=$(uname -m)
-OS=$(uname -s)
+# Auto-detect all hardware limits and print recommended model sizing
+python3 scripts/hardware_model_profiler.py
 
-if [ "$OS" = "Darwin" ]; then
-    echo "Host: Apple Silicon macOS"
-    sysctl -n machdep.cpu.brand_string
-    sysctl -n hw.memsize | awk '{print "Unified RAM: " $1/1024/1024/1024 " GB"}'
-elif [ "$OS" = "Linux" ]; then
-    if command -v /usr/local/bin/llama-bench >/dev/null 2>&1; then
-        echo "=== Vulkan / Compute Accelerators ==="
-        /usr/local/bin/llama-bench --list-devices
-    fi
-    lscpu | grep "Model name\|CPU(s):"
-    free -h
-fi
+# Or specify custom RAM/VRAM constraints (e.g. 4GB VRAM, 16GB RAM)
+python3 scripts/hardware_model_profiler.py --vram-gb 4.0 --ram-gb 16.0 --save-configs --model-name my-model
 ```
 
 ### 1.2 Memory Bandwidth & Model Selection Rules
@@ -37,12 +27,14 @@ fi
 Generation speed is fundamentally bounded by memory bandwidth:
 $$\text{Max Generation Tokens/sec} \approx \frac{\text{Memory Bandwidth (GB/s)}}{\text{Model Footprint (GB)}}$$
 
-| Architecture | Memory Bus | Bandwidth | Optimal Model Size | Quantization |
-| :--- | :--- | :---: | :---: | :---: |
-| **Apple Silicon (M-series)** | Unified LPDDR5 | 150–800 GB/s | **7B to 32B** | **Q5_K_M** (9.8 GB) / **Q4_K_M** (19 GB) |
-| **Discrete GPU (AMD/NVIDIA)** | Dedicated GDDR6 | 192–448 GB/s | **3B to 7B** | **IQ3_M** (3.57 GB) / **Q4_K_M** (2.1 GB) |
-| **Intel Core i9 / DDR4 RAM** | Dual-channel DDR4 | 25–40 GB/s | **1.5B to 3B** | **Q4_K_M** (1.1–2.1 GB) |
-| **Linux ARM64 (Graviton/SBC)**| DDR4 / LPDDR4x | 20–50 GB/s | **1.5B to 3B** | **Q4_K_M** (1.1–2.1 GB) |
+| System Architecture | Memory Bus | Bandwidth | Optimal Model Size | Quantization | Headroom Left |
+| :--- | :--- | :---: | :---: | :---: | :---: |
+| **Apple Silicon (36–64 GB)** | Unified LPDDR5 | 300–400 GB/s | **14B to 32B** | **Q5_K_M** (9.8–22 GB) | 20+ GB |
+| **Apple Silicon (16–24 GB)** | Unified LPDDR5 | 150–200 GB/s | **7B** | **Q5_K_M** (5.2 GB) | 10+ GB |
+| **Discrete GPU (8–16 GB VRAM)**| Dedicated GDDR6 | 288–448 GB/s | **7B to 14B** | **Q5_K_M** / **Q4_K_M** | 2–4 GB |
+| **Discrete GPU (4 GB GDDR6)** | Dedicated GDDR6 | 192 GB/s | **7B** | **IQ3_M** (3.57 GB) | 0.4 GB |
+| **Intel/AMD DDR4 RAM (CPU)** | Dual-channel DDR4 | 25–40 GB/s | **1.5B to 3B** | **Q4_K_M** (1.1–2.1 GB) | 14+ GB |
+| **Linux ARM64 (Graviton/SBC)**| DDR4 / LPDDR4x | 20–50 GB/s | **1.5B to 3B** | **Q4_K_M** (1.1–2.1 GB) | 10+ GB |
 
 ### 1.3 Thermal & Watchdog Guardrails
 - **CPU Temperature Ceiling**: Keep CPU package temperature $\le 80^\circ\text{C}$ (homelab watchdog ceiling is $88^\circ\text{C}$).
@@ -51,11 +43,35 @@ $$\text{Max Generation Tokens/sec} \approx \frac{\text{Memory Bandwidth (GB/s)}}
 
 ---
 
-## 📦 Phase 2: Ingestion & Quantization Strategy
+## 📦 Phase 2: Turnkey Model Creation for Any System Limits
 
-1. **Target Model**: Download pre-quantized GGUF or convert Hugging Face weights using `llama.cpp/convert_hf_to_gguf.py`.
-2. **Draft Model Pairing**: For speculative decoding, select a smaller model from the same architecture family (e.g. Qwen 7B target + Qwen 0.5B draft; Llama-3 8B target + Llama-3.2 1B draft).
-3. **Draft Quantization**: Use **Q8_0** (or **Q4_K_M**) for the draft model to maintain drafting accuracy while keeping memory footprint under 400–600 MB.
+Generate a complete, ready-to-deploy LLM stack tailored to your system's exact specifications with a single command:
+
+```bash
+# Example A: Auto-detect local system and configure Qwen 2.5 Coder
+python3 scripts/create_custom_model.py \
+  --base-model "Qwen/Qwen2.5-Coder-7B-Instruct" \
+  --name "apex-code-local"
+
+# Example B: Custom target (e.g. 4GB VRAM GPU, 16GB RAM)
+python3 scripts/create_custom_model.py \
+  --base-model "Qwen/Qwen2.5-Coder-7B-Instruct" \
+  --name "apex-code-vulkan-4gb" \
+  --vram-gb 4.0 \
+  --ram-gb 16.0
+
+# Example C: Llama 3.2 on a 16GB RAM CPU system
+python3 scripts/create_custom_model.py \
+  --base-model "meta-llama/Llama-3.2-3B-Instruct" \
+  --name "llama-code-fast" \
+  --ram-gb 16.0
+```
+
+This creates:
+1. `Modelfile.<name>`: Engineered system prompt, thinking tokens, and format constraints.
+2. `presets.<name>.ini`: Multi-model presets with flash-attention, KV-cache quantization (`q8_0`), and speculative decoding.
+3. `download_<name>.sh`: Automated GGUF downloader resolving Hugging Face URLs.
+4. `start_<name>.sh`: 1-click launcher for `llama-server` or `ollama`.
 
 ---
 

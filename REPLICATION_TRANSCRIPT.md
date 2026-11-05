@@ -47,9 +47,19 @@ You are task-assigned to execute an end-to-end model creation, hardware optimiza
 
 ## 🛠️ Step-by-Step Transcript Execution
 
-### Step 1: Hardware Topology & Memory Bandwidth Profiling
+### Step 1: Hardware Topology & Dynamic Memory Profiling
 
-Run this inspection command to automatically determine the hardware profile:
+Run the automated profiler to automatically determine physical RAM, GPU VRAM, memory bandwidth, and optimal model parameters:
+
+```bash
+# Auto-detect all hardware limits and print recommended model sizing
+python3 scripts/hardware_model_profiler.py
+
+# Or inspect custom constraints (e.g. 4GB VRAM, 16GB RAM)
+python3 scripts/hardware_model_profiler.py --vram-gb 4.0 --ram-gb 16.0 --save-configs --model-name my-model
+```
+
+Alternatively, manually inspect your system:
 
 ```bash
 # Detect Operating System & Architecture
@@ -84,9 +94,32 @@ fi
 
 ---
 
-### Step 2: Model Acquisition & Multi-Model Presets
+### Step 2: Turnkey Model Creation for Any System Limits
 
-#### 2.1 Download Target and Draft Weights
+#### 2.1 1-Command Automated Model Creator
+You can generate a complete, customized model stack tailored to your exact hardware limits in a single command:
+
+```bash
+# Auto-detect hardware and generate configs for Qwen 2.5 Coder
+python3 scripts/create_custom_model.py \
+  --base-model "Qwen/Qwen2.5-Coder-7B-Instruct" \
+  --name "apex-code-local"
+
+# Or tailor specifically to target limits (e.g., 4GB VRAM GPU, 16GB RAM)
+python3 scripts/create_custom_model.py \
+  --base-model "Qwen/Qwen2.5-Coder-7B-Instruct" \
+  --name "apex-code-vulkan-4gb" \
+  --vram-gb 4.0 \
+  --ram-gb 16.0
+```
+
+This automatically outputs:
+- `Modelfile.<name>`: Tuned context, temperature, and competitive programming rules.
+- `presets.<name>.ini`: Fast flash-attention, `q8_0` KV cache, and thread pinning.
+- `download_<name>.sh`: Automated GGUF downloader from Hugging Face Hub.
+- `start_<name>.sh`: 1-click launcher for `llama-server` or `ollama`.
+
+#### 2.2 Manual Model Acquisition & Presets (Alternative)
 ```bash
 mkdir -p $HOME/models
 

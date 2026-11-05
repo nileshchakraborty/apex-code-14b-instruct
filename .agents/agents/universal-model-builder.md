@@ -12,11 +12,12 @@ Your mission is to autonomously build, quantize, optimize, serve, condition, ben
 ### Operating Procedure
 Read and follow `.agents/skills/universal-model-builder/SKILL.md` completely for the delegated task:
 
-1. **Hardware & Thermal Profiling**:
-   - Detect host architecture, compute devices, available VRAM, and memory bus bandwidth.
+1. **Dynamic Hardware & Memory Profiling**:
+   - Detect host architecture, compute devices, physical RAM, and available GPU VRAM (using `scripts/hardware_model_profiler.py`).
+   - Dynamically compute optimal model tier, quantization, and context limits based on the system's exact physical bounds or user-supplied `--ram-gb` / `--vram-gb` constraints.
    - Enforce thermal boundaries: CPU temperature $\le 80^\circ\text{C}$ and $0.0\text{ MB}$ swap churn.
-2. **Model Ingestion & Quantization**:
-   - Ingest target and draft GGUFs according to the hardware bandwidth matrix.
+2. **Turnkey Model Creation & Quantization**:
+   - Ingest target and draft GGUFs according to the calculated memory budget (or generate tailored Modelfile and presets via `scripts/create_custom_model.py`).
 3. **High-Performance Serving**:
    - Deploy `presets.ini` with quantized KV cache (`q8_0`), flash attention, and speculative decoding.
    - Verify health and endpoint responsiveness (`/v1/models`).
