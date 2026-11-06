@@ -80,6 +80,53 @@ def publish(
             commit_message="feat: add 36GB-optimized Ollama Modelfile for ApexThink-14B",
         )
 
+    cid_modelfile_path = "./configs/ollama/Modelfile.apex-cid-14b"
+    if os.path.isfile(cid_modelfile_path):
+        print("⚙️ Uploading Ollama Modelfile (ApexCode-CID-14B)...")
+        api.upload_file(
+            path_or_fileobj=cid_modelfile_path,
+            path_in_repo="Modelfile.apex-cid-14b",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="feat: add Compact Invariant Distillation (CID v2.0) Ollama Modelfile",
+        )
+
+    cid_results_path = "./tests/lcb_benchmark_cid_v2_25p.json"
+    if os.path.isfile(cid_results_path):
+        print("📊 Uploading Verified CID v2 25-Problem LiveCodeBench (72% Pass@1) Results...")
+        api.upload_file(
+            path_or_fileobj=cid_results_path,
+            path_in_repo="lcb_benchmark_cid_v2_25p.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add 72.0% Pass@1 verified Compact Invariant Distillation (CID v2) LiveCodeBench scorecard",
+        )
+
+    release_notes_path = "./RELEASE_NOTES_v2.0.0.md"
+    if os.path.isfile(release_notes_path):
+        print("📄 Uploading Release Notes v2.0.0...")
+        api.upload_file(
+            path_or_fileobj=release_notes_path,
+            path_in_repo="RELEASE_NOTES_v2.0.0.md",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add Release Notes v2.0.0 for Compact Invariant Distillation",
+        )
+
+    adapter_dir = "./adapters/qwen_cid_v2_lora"
+    if os.path.isdir(adapter_dir):
+        print("📦 Uploading CID v2 LoRA adapter files...")
+        for fname in ["adapters.safetensors", "adapter_config.json"]:
+            fpath = os.path.join(adapter_dir, fname)
+            if os.path.isfile(fpath):
+                api.upload_file(
+                    path_or_fileobj=fpath,
+                    path_in_repo=f"adapters/qwen_cid_v2_lora/{fname}",
+                    repo_id=repo_id,
+                    repo_type="model",
+                    commit_message=f"feat: upload CID v2 LoRA {fname}",
+                )
+
     test_results_path = "./tests/end_to_end_test_results.json"
     if os.path.isfile(test_results_path):
         print("📊 Uploading Verified End-to-End Test Results...")

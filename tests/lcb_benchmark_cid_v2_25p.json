@@ -1,0 +1,292 @@
+{
+  "benchmark": "LiveCodeBench (Strictly Blind CID LoRA)",
+  "model": "mlx-community/Qwen2.5-Coder-14B-Instruct-4bit",
+  "adapter": "/Users/nileshchakraborty/workspace/model-creator/adapters/qwen_cid_v2_lora",
+  "problem_count": 25,
+  "overall_pass_at_1": 0.72,
+  "passed_count": 18,
+  "metrics": {
+    "pass@1": 0.72,
+    "detail": {
+      "pass@1": {
+        "0": 1.0,
+        "1": 0.0,
+        "2": 0.0,
+        "3": 0.0,
+        "4": 0.0,
+        "5": 1.0,
+        "6": 0.0,
+        "7": 1.0,
+        "8": 1.0,
+        "9": 1.0,
+        "10": 1.0,
+        "11": 1.0,
+        "12": 1.0,
+        "13": 1.0,
+        "14": 1.0,
+        "15": 1.0,
+        "16": 1.0,
+        "17": 1.0,
+        "18": 1.0,
+        "19": 1.0,
+        "20": 0.0,
+        "21": 1.0,
+        "22": 1.0,
+        "23": 0.0,
+        "24": 1.0
+      }
+    }
+  },
+  "problems": [
+    {
+      "question_id": "1873_A",
+      "question_title": "A. Short Sort",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 5,
+      "total_cases": 5,
+      "latency_sec": 9.34682011604309,
+      "code": "import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    if not data:\n        return\n    t = int(data[0])\n    results = []\n    for i in range(1, t + 1):\n        s = data[i]\n        if s[0] == 'a' or s[1] == 'b' or s[2] == 'c':\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n    print('\\n'.join(results))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1873_B",
+      "question_title": "B. Good Kid",
+      "difficulty": "easy",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 12.40138578414917,
+      "code": "import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    idx = 0\n    out = []\n    t = int(data[idx]); idx += 1\n    for _ in range(t):\n        n = int(data[idx]); idx += 1\n        a = [int(x) for x in data[idx:idx+n]]; idx += n\n        \n        min_non_zero = min((x for x in a if x != 0), default=1)\n        max_idx = a.index(max(a))\n        \n        if 0 in a:\n            a[a.index(0)] += 1\n        else:\n            a[max_idx] += 1\n            \n        prod = 1\n        for x in a:\n            prod *= x\n            \n        out.append(str(prod))\n            \n    print('\\n'.join(out))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1883_B",
+      "question_title": "B. Chemistry",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 10.409060001373291,
+      "code": "import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    idx = 0\n    results = []\n    for _ in range(int(data[idx]); idx += 1):\n        n = int(data[idx]); k = int(data[idx]); idx += 1\n        s = data[idx]; idx += 1\n        \n        freq = {char: 0 for char in set(s)}\n        for char in s:\n            freq[char] += 1\n            \n        odd_count = sum(1 for c in freq.values() if c % 2 != 0)\n        \n        if odd_count - 1 <= k:\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n    print('\\n'.join(results))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1883_C",
+      "question_title": "C. Raspberries",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 12.696079969406128,
+      "code": "import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    idx = 0\n    out = []\n    t = int(data[idx]); idx += 1\n    for _ in range(t):\n        n = int(data[idx]); k = int(data[idx]); idx += 1\n        a = [int(x) for x in data[idx:idx+n]]; idx += n\n        \n        if k == 4:\n            cost_single = min((4 - (x % 4)) % 4 for x in a)\n            evens = sum(1 for x in a if x % 2 == 0)\n            cost_two_evens = max(0, 2 - evens)\n            out.append(str(min(cost_single, cost_two_evens)))\n        else:\n            cost = min((k - (x % k)) % k for x in a)\n            out.append(str(cost))\n    print('\\n'.join(out))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1899_A",
+      "question_title": "A. Game with Integers",
+      "difficulty": "easy",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 72.10201978683472,
+      "code": "<think>\nPost-move state evaluation: Player 1 wins immediately on turn 1 if there exists Delta in {-1, +1} such that (n + Delta) % 3 == 0.\nThis condition holds if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and only if and"
+    },
+    {
+      "question_id": "1899_C",
+      "question_title": "C. Yarik and Array",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13,
+      "latency_sec": 11.41543698310852,
+      "code": "import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    idx = 0\n    out = []\n    t = int(data[idx]); idx += 1\n    for _ in range(t):\n        n = int(data[idx]); idx += 1\n        a = [int(x) for x in data[idx:idx+n]]; idx += n\n        \n        curr = a[0]\n        ans = a[0]\n        for i in range(1, n):\n            if (a[i] % 2) != (a[i - 1] % 2):\n                curr = max(a[i], curr + a[i])\n            else:\n                curr = a[i]\n            ans = max(ans, curr)\n        out.append(str(ans))\n    print('\\n'.join(out))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1899_D",
+      "question_title": "D. Yarik and Musical Notes",
+      "difficulty": "hard",
+      "passed": false,
+      "passed_cases": 1,
+      "total_cases": 2,
+      "latency_sec": 12.09209394454956,
+      "code": "import sys\nfrom collections import Counter\n\ndef solve():\n    data = sys.stdin.read().split()\n    idx = 0\n    out = []\n    t = int(data[idx]); idx += 1\n    for _ in range(t):\n        n = int(data[idx]); idx += 1\n        a = [int(x) for x in data[idx:idx+n]]; idx += n\n        \n        freq = Counter()\n        for x in a:\n            freq[x / (2 ** x)] += 1\n            \n        ans = 0\n        for cnt in freq.values():\n            ans += cnt * (cnt - 1) // 2\n            \n        out.append(str(ans))\n    print('\\n'.join(out))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "2730",
+      "question_title": "maximum-or",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 11.44075894355774,
+      "code": "from typing import List\n\nclass Solution:\n    def maximumOr(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        if n == 1:\n            return nums[0] << k\n            \n        prefix = [0] * n\n        prefix[1] = nums[0]\n        for i in range(2, n):\n            prefix[i] = prefix[i - 1] | nums[i - 1]\n            \n        suffix = [0] * n\n        suffix[-2] = nums[-1]\n        for i in range(n - 3, -1, -1):\n            suffix[i] = suffix[i + 1] | nums[i + 1]\n            \n        max_val = 0\n        for i in range(n):\n            shifted = nums[i] << k\n            result = prefix[i] | shifted | suffix[i]\n            if result > max_val:\n                max_val = result\n                \n        return max_val"
+    },
+    {
+      "question_id": "2754",
+      "question_title": "maximum-strength-of-a-group",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.2275972366333,
+      "code": "from typing import List\n\nclass Solution:\n    def maxStrength(self, nums: List[int]) -> int:\n        if len(nums) == 1:\n            return nums[0]\n            \n        positives = [x for x in nums if x > 0]\n        negatives = sorted([x for x in nums if x < 0])\n        odd_count = len(negatives) % 2 != 0\n        \n        if odd_count:\n            negatives.pop()\n            \n        chosen = positives + negatives\n        if not chosen:\n            chosen = [max(nums)]\n            \n        prod = 1\n        for x in chosen:\n            prod *= x\n            \n        return prod"
+    },
+    {
+      "question_id": "2756",
+      "question_title": "buy-two-chocolates",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.234940052032471,
+      "code": "from typing import List\n\nclass Solution:\n    def buyChoco(self, prices: List[int], money: int) -> int:\n        min1 = min(prices)\n        prices.remove(min1)\n        min2 = min(prices)\n        \n        if min1 + min2 <= money:\n            return money - (min1 + min2)\n        else:\n            return money"
+    },
+    {
+      "question_id": "2757",
+      "question_title": "count-of-integers",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 13.518996238708496,
+      "code": "from functools import cache\n\nclass Solution:\n    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:\n        MOD = 10**9 + 7\n        \n        def count_le(s: str) -> int:\n            @cache\n            def dp(i: int, tight: bool, d_sum: int) -> int:\n                if d_sum > max_sum:\n                    return 0\n                if i == len(s):\n                    return 1 if d_sum >= min_sum else 0\n                limit = int(s[i]) if tight else 9\n                res = 0\n                for d in range(limit + 1):\n                    res = (res + dp(i + 1, tight and (d == limit), d_sum + d)) % MOD\n                return res\n            return dp(0, True, 0)\n            \n        num1_minus_1 = str(int(num1) - 1)\n        ans = (count_le(num2) - count_le(num1_minus_1)) % MOD\n        return ans"
+    },
+    {
+      "question_id": "2785",
+      "question_title": "semi-ordered-permutation",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 8.297154903411865,
+      "code": "from typing import List\n\nclass Solution:\n    def semiOrderedPermutation(self, nums: List[int]) -> int:\n        n = len(nums)\n        idx1 = nums.index(1)\n        idxn = nums.index(n)\n        \n        swaps = idx1 + (n - 1 - idxn)\n        if idx1 > idxn:\n            swaps -= 1\n            \n        return swaps"
+    },
+    {
+      "question_id": "2792",
+      "question_title": "neighboring-bitwise-xor",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 6.645251035690308,
+      "code": "from typing import List\n\nclass Solution:\n    def doesValidArrayExist(self, derived: List[int]) -> bool:\n        xor_sum = 0\n        for x in derived:\n            xor_sum ^= x\n        return xor_sum == 0"
+    },
+    {
+      "question_id": "2810",
+      "question_title": "collecting-chocolates",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.961021184921265,
+      "code": "from typing import List\n\nclass Solution:\n    def minCost(self, nums: List[int], x: int) -> int:\n        n = len(nums)\n        min_costs = list(nums)\n        ans = sum(min_costs)\n        \n        for k in range(1, n):\n            for i in range(n):\n                min_costs[i] = min(min_costs[i], nums[(i - k) % n])\n            ans = min(ans, k * x + sum(min_costs))\n            \n        return ans"
+    },
+    {
+      "question_id": "2811",
+      "question_title": "determine-the-minimum-sum-of-a-k-avoiding-array",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.010545969009399,
+      "code": "class Solution:\n    def minimumSum(self, n: int, k: int) -> int:\n        seen = set()\n        total = 0\n        curr = 1\n        while len(seen) < n:\n            if (k - curr) not in seen:\n                seen.add(curr)\n                total += curr\n            curr += 1\n        return total"
+    },
+    {
+      "question_id": "2817",
+      "question_title": "minimum-cost-to-make-all-characters-equal",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 8.087552070617676,
+      "code": "from typing import List\n\nclass Solution:\n    def minimumCost(self, s: str) -> int:\n        n = len(s)\n        total_cost = 0\n        for i in range(1, n):\n            if s[i] != s[i - 1]:\n                total_cost += min(i, n - i)\n        return total_cost"
+    },
+    {
+      "question_id": "2819",
+      "question_title": "remove-trailing-zeros-from-a-string",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 5.409415006637573,
+      "code": "class Solution:\n    def removeTrailingZeros(self, num: str) -> str:\n        i = len(num) - 1\n        while i >= 0 and num[i] == '0':\n            i -= 1\n        return num[:i + 1]"
+    },
+    {
+      "question_id": "2824",
+      "question_title": "check-if-the-number-is-fascinating",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.040236949920654,
+      "code": "class Solution:\n    def isFascinating(self, n: int) -> bool:\n        s = str(n) + str(2 * n) + str(3 * n)\n        return len(s) == 9 and set(s) == set('123456789')"
+    },
+    {
+      "question_id": "2827",
+      "question_title": "greatest-common-divisor-traversal",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 83,
+      "total_cases": 83,
+      "latency_sec": 16.999632835388184,
+      "code": "from typing import List\n\nclass Solution:\n    def canTraverseAllPairs(self, nums: List[int]) -> bool:\n        n = len(nums)\n        if n == 1:\n            return True\n        if 1 in nums:\n            return False\n            \n        parent = list(range(n))\n        size = [1] * n\n        \n        def find(x):\n            if parent[x] != x:\n                parent[x] = find(parent[x])\n            return parent[x]\n            \n        def union(x, y):\n            rx, ry = find(x), find(y)\n            if rx != ry:\n                if size[rx] < size[ry]:\n                    rx, ry = ry, rx\n                parent[ry] = rx\n                size[rx] += size[ry]\n\n        prime_to_first_idx = {}\n        for i, val in enumerate(nums):\n            temp = val\n            d = 2\n            while d * d <= temp:\n                if temp % d == 0:\n                    while temp % d == 0:\n                        temp //= d\n                    if d in prime_to_first_idx:\n                        union(i, prime_to_first_idx[d])\n                    else:\n                        prime_to_first_idx[d] = i\n                d += 1\n            if temp > 1:\n                if temp in prime_to_first_idx:\n                    union(i, prime_to_first_idx[temp])\n                else:\n                    prime_to_first_idx[temp] = i\n                    \n        root = find(0)\n        return size[root] == n"
+    },
+    {
+      "question_id": "2828",
+      "question_title": "lexicographically-smallest-string-after-substring-operation",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 9.2223539352417,
+      "code": "class Solution:\n    def smallestString(self, s: str) -> str:\n        chars = list(s)\n        n = len(chars)\n        \n        i = 0\n        while i < n and chars[i] == 'a':\n            i += 1\n            \n        if i == n:\n            chars[-1] = 'z'\n            return \"\".join(chars)\n            \n        while i < n and chars[i] != 'a':\n            chars[i] = chr(ord(chars[i]) - 1)\n            i += 1\n            \n        return \"\".join(chars)"
+    },
+    {
+      "question_id": "2832",
+      "question_title": "find-the-longest-equal-subarray",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 10,
+      "total_cases": 11,
+      "latency_sec": 11.717414855957031,
+      "code": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def longestEqualSubarray(self, nums: List[int], k: int) -> int:\n        index_map = defaultdict(list)\n        for i, val in enumerate(nums):\n            index_map[val].append(i)\n            \n        max_len = 0\n        for indices in index_map.values():\n            left = 0\n            right = 1\n            curr_len = 1\n            \n            while right < len(indices):\n                needed_deletions = indices[right] - indices[right - 1] - 1\n                if needed_deletions <= k:\n                    curr_len += 1\n                    right += 1\n                else:\n                    k += indices[right - 1] - indices[left]\n                    left += 1\n                    \n            max_len = max(max_len, curr_len)\n            \n        return max_len"
+    },
+    {
+      "question_id": "2833",
+      "question_title": "count-zero-request-servers",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 15.087486982345581,
+      "code": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def countServers(self, n: int, logs: List[List[int]], x: int, queries: List[int]) -> List[int]:\n        logs.sort(key=lambda a: a[1])\n        q_sorted = sorted([(q, idx) for idx, q in enumerate(queries)], key=lambda a: a[0])\n        \n        res = [0] * len(queries)\n        freq = defaultdict(int)\n        active_count = 0\n        \n        left = 0\n        right = 0\n        m = len(logs)\n        \n        for q_time, orig_idx in q_sorted:\n            while right < m and logs[right][1] <= q_time:\n                s_id = logs[right][0]\n                if freq[s_id] == 0:\n                    active_count += 1\n                freq[s_id] += 1\n                right += 1\n                \n            while left < m and logs[left][1] < q_time - x:\n                s_id = logs[left][0]\n                freq[s_id] -= 1\n                if freq[s_id] == 0:\n                    active_count -= 1\n                left += 1\n                \n            res[orig_idx] = n - active_count\n            \n        return res"
+    },
+    {
+      "question_id": "2834",
+      "question_title": "relocate-marbles",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.643493890762329,
+      "code": "from typing import List\n\nclass Solution:\n    def relocateMarbles(self, nums: List[int], moveFrom: List[int], moveTo: List[int]) -> List[int]:\n        occupied = set(nums)\n        for i in range(len(moveFrom)):\n            if moveFrom[i] in occupied:\n                occupied.remove(moveFrom[i])\n            occupied.add(moveTo[i])\n        return sorted(occupied)"
+    },
+    {
+      "question_id": "2839",
+      "question_title": "maximum-sum-queries",
+      "difficulty": "hard",
+      "passed": false,
+      "passed_cases": 1,
+      "total_cases": 2,
+      "latency_sec": 16.808889150619507,
+      "code": "from typing import List\nfrom bisect import bisect_left\n\nclass Solution:\n    def maximumSumQueries(self, nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:\n        n = len(nums1)\n        pairs = sorted([(nums1[i], nums2[i]) for i in range(n)], reverse=True)\n        q_sorted = sorted([(q, idx) for idx, q in enumerate(queries)], reverse=True)\n        \n        ans = [-1] * len(queries)\n        stack = []\n        p_idx = 0\n        \n        for q_req, orig_idx in q_sorted:\n            x_req, y_req = q_req\n            while p_idx < n and pairs[p_idx][0] >= x_req:\n                y_val = pairs[p_idx][1]\n                p_idx += 1\n                req_sum = x_req + y_val\n                while stack and stack[-1][1] <= req_sum:\n                    stack.pop()\n                if not stack or stack[-1][0] < y_val:\n                    stack.append((y_val, req_sum))\n                    \n            idx = bisect_left(stack, (y_req, -1))\n            if idx < len(stack):\n                ans[orig_idx] = stack[idx][1]\n                \n        return ans"
+    },
+    {
+      "question_id": "2849",
+      "question_title": "sum-of-imbalance-numbers-of-all-subarrays",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 11.863245725631714,
+      "code": "from typing import List\n\nclass Solution:\n    def sumImbalanceNumbers(self, nums: List[int]) -> int:\n        n = len(nums)\n        total = 0\n        for i in range(n):\n            seen = {nums[i]}\n            curr = 0\n            for j in range(i + 1, n):\n                x = nums[j]\n                if x not in seen:\n                    seen.add(x)\n                    has_prev = (x - 1) in seen\n                    has_next = (x + 1) in seen\n                    if has_prev and has_next:\n                        curr -= 1\n                    elif not has_prev and not has_next:\n                        curr += 1\n                total += curr\n        return total"
+    }
+  ]
+}
