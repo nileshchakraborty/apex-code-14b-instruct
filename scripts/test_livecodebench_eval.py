@@ -26,6 +26,7 @@ from scripts.recursive_task_scheduler import RecursiveTaskScheduler, CognitiveRo
 from scripts.epistemic_cache import EpistemicMemoryBus
 from scripts.car_analyzer import CARAnalyzer
 from scripts.epistemic_gap_arbiter import EpistemicGapArbiter
+from scripts.mathematical_induction_pipeline import generate_mathematical_induction_solution
 import asyncio
 
 
@@ -33,13 +34,26 @@ def main():
     parser = argparse.ArgumentParser(description="LiveCodeBench Evaluation Runner")
     parser.add_argument("--count", type=int, default=25, help="Number of problems to evaluate (default: 25)")
     parser.add_argument("--offset", type=int, default=0, help="Starting problem index (default: 0)")
-    parser.add_argument("--output", type=str, default="tests/lcb_benchmark_results.json", help="Output path for results")
+    parser.add_argument("--output", type=str, default="", help="Output path for results")
+    parser.add_argument(
+        "--model",
+        type=str,
+        default="apex-coder-14b",
+        help="Ollama model to evaluate (default: apex-coder-14b)",
+    )
+    parser.add_argument(
+        "--subset",
+        type=str,
+        default="failed",
+        choices=["failed", "slice"],
+        help="Problem subset: 'failed' evaluates the 25 problems that failed in earlier test; 'slice' evaluates sequential slice from offset.",
+    )
     parser.add_argument(
         "--pipeline",
         type=str,
-        default="unified",
-        choices=["standard", "clean", "contracts", "unified", "recursive_swarm"],
-        help="Inference pipeline architecture (default: unified)",
+        default="standard",
+        choices=["standard", "clean", "contracts", "unified", "recursive_swarm", "mathematical_induction"],
+        help="Inference pipeline architecture (default: standard)",
     )
     parser.add_argument(
         "--mode",
@@ -50,16 +64,35 @@ def main():
     )
     args = parser.parse_args()
 
+    # Set CODE_MODEL in environment so sub-modules respect it
+    os.environ["CODE_MODEL"] = args.model
+
+    FAILED_25_IDS = [
+        "1873_A", "1873_B", "1883_B", "1883_C", "1899_A", "1899_C", "1899_D",
+        "2730", "2754", "2756", "2757", "2785", "2792",
+        "2810", "2811", "2817", "2819", "2824", "2827", "2828",
+        "2832", "2833", "2834", "2839", "2849"
+    ]
+
+    default_output = "tests/lcb_benchmark_25_failed_results.json" if args.subset == "failed" else "tests/lcb_benchmark_results.json"
+    output_path = args.output if args.output else default_output
+
     print("=" * 72)
-    print("🏆 LIVECODEBENCH BENCHMARK: APEXCODE-14B")
-    print(f"Target Problem Count: {args.count} | Offset: {args.offset}")
+    print("🏆 LIVECODEBENCH BENCHMARK: 25 FAILED PROBLEMS EVALUATION")
+    print(f"Model: {args.model} | Problem Selection: {args.subset.upper()} (Count: {args.count})")
     print(f"Pipeline: {args.pipeline.upper()} | Decoding Mode: {args.mode}")
     print("=" * 72)
 
     dataset = load_code_generation_dataset()
     total_available = len(dataset)
-    test_slice = dataset[args.offset : args.offset + args.count]
-    print(f"Loaded {total_available} problems. Evaluating slice of {len(test_slice)} problems:\n")
+    
+    if args.subset == "failed":
+        ds_map = {p.question_id: p for p in dataset}
+        test_slice = [ds_map[pid] for pid in FAILED_25_IDS if pid in ds_map][:args.count]
+        print(f"Loaded {total_available} problems. Evaluating targeted failure set of {len(test_slice)} problems:\n")
+    else:
+        test_slice = dataset[args.offset : args.offset + args.count]
+        print(f"Loaded {total_available} problems. Evaluating slice of {len(test_slice)} problems:\n")
 
     samples_list = []
     generations_list = []
@@ -74,6 +107,7 @@ def main():
 
     for idx, prob in enumerate(test_slice, 1):
         print(f"[{idx}/{len(test_slice)}] {prob.question_id}: {prob.question_title} ({prob.difficulty.value})")
+        meta_extra = {}
 
         if args.pipeline == "recursive_swarm":
             t_prob_start = time.perf_counter()
@@ -118,20 +152,42 @@ def main():
             code = res.get("code", "")
             latency = res.get("latency_sec", 0.0)
             tokens = res.get("tokens", 0)
+            meta_extra = {}
+        elif args.pipeline == "mathematical_induction":
+            res = generate_mathematical_induction_solution(
+                prob=prob,
+                model=args.model,
+                mode=args.mode,
+            )
+            code = res.get("code", "")
+            latency = res.get("latency_sec", 0.0)
+            tokens = res.get("tokens", 0)
+            meta_extra = {
+                "backtracked": False,
+                "repaired": False,
+                "sample_passed": None,
+            }
         else:
+            meta_extra = {}
             prompt = (
                 f"You are an expert competitive programmer. Solve the following problem in Python 3.\n\n"
                 f"PROBLEM:\n{prob.question_content}\n\n"
             )
             if prob.starter_code:
                 prompt += f"STARTER CODE:\n```python\n{prob.starter_code}\n```\n\n"
-            prompt += (
-                "Write the complete solution reading from standard input and printing to standard output "
-                "as required by the problem. Output ONLY the code inside a standard ```python block."
-            )
+                prompt += (
+                    "Implement the complete solution inside the provided starter template. "
+                    "Output ONLY the code inside a standard ```python block."
+                )
+            else:
+                prompt += (
+                    "Write the complete solution reading from standard input (sys.stdin.read().split()) "
+                    "and printing to standard output as required by the problem. "
+                    "Output ONLY the code inside a standard ```python block."
+                )
 
             res = query_ollama(
-                model=CODE_MODEL,
+                model=args.model,
                 messages=[
                     {
                         "role": "system",
@@ -159,6 +215,7 @@ def main():
             "latency_sec": latency,
             "tokens": tokens,
             "code": code,
+            **meta_extra,
         })
 
     total_generation_time = round(time.perf_counter() - t_start_total, 2)
@@ -216,11 +273,15 @@ def main():
     print("=" * 72)
 
     # Persist results to disk
-    out_file = os.path.join(APEX_DIR, args.output)
+    if os.path.isabs(output_path):
+        out_file = output_path
+    else:
+        out_file = os.path.join(MODEL_CREATOR_DIR, output_path)
     os.makedirs(os.path.dirname(out_file), exist_ok=True)
     report = {
         "benchmark": "LiveCodeBench",
-        "model": "apex-code-14b-instruct",
+        "model": args.model,
+        "subset": args.subset,
         "pipeline": args.pipeline,
         "decoding_mode": args.mode,
         "problem_count": len(test_slice),
