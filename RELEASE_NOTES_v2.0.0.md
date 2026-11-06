@@ -9,17 +9,17 @@ This release permanently solves the "preamble trap" (where models generate verbo
 ### 🚀 Key Highlights & Architectural Innovations
 
 1. **Compact Invariant Distillation (CID) v2.0 Architecture**
-   - **Bounded Cognitive Budget**: Reasoning inside `<think> ... </think>` is mathematically restricted to $\le 150$ tokens ($\le 2$ dense sentences), preventing token exhaustion, preamble drift, and attention dilution.
+   - **Bounded Cognitive Budget**: Reasoning inside `<think> ... </think>` is mathematically restricted to under 150 tokens (at most 2 dense sentences), preventing token exhaustion, preamble drift, and attention dilution.
    - **Direct Variable-Code Binding**: Derived invariants map 1:1 into executable Python statements (e.g., parity conditions, prefix bounds, or sliding window transitions).
    - **Clean Interface Isolation**: Zero confusion between typed `class Solution` (LeetCode) and fast I/O `sys.stdin.read().split()` (Codeforces/Competitive).
 
 2. **Verified Problem Recoveries (Zero Contamination, Single Forward Pass)**
    - **`2754` (maximum-strength-of-a-group)**: 14/14 Passed (100%). Internalized exact negative sign parity elimination (`if len(negatives) % 2 != 0: negatives.pop()`).
-   - **`2757` (count-of-integers)**: 14/14 Passed (100%). Replaced naive iteration with canonical memoized prefix Digit DP (`@cache def dp(i, tight, d_sum)`), solving 22-digit queries in $< 1$ ms.
+   - **`2757` (count-of-integers)**: 14/14 Passed (100%). Replaced naive iteration with canonical memoized prefix Digit DP (`@cache def dp(i, tight, d_sum)`), solving 22-digit queries in under 1 ms.
    - **`1899_C` (Yarik and Array - Hard)**: 13/13 Passed (100%). Solved via alternating parity Kadane's algorithm.
    - **`2810` (Collecting Chocolates)**: 14/14 Passed (100%). Solved via cyclic shift cost envelope minimization.
-   - **`2811` (K-Avoiding Array)**: 14/14 Passed (100%). Solved via greedy positive set avoidance sequence ($k - x \notin S$).
-   - **`2849` (Sum of Imbalance Numbers - Hard)**: 14/14 Passed (100%). Solved via bridge and component tracking in $O(N^2)$.
+   - **`2811` (K-Avoiding Array)**: 14/14 Passed (100%). Solved via greedy positive set avoidance sequence (`k - x not in S`).
+   - **`2849` (Sum of Imbalance Numbers - Hard)**: 14/14 Passed (100%). Solved via bridge and component tracking in O(N^2).
    - **`2827` (Greatest Common Divisor Traversal - Hard)**: 83/83 Passed (100%). Maintained complete graph connectivity across all 83 test suites via domain-separated Union-Find.
 
 3. **Inviolable Sandbox Integrity & Zero Contamination**

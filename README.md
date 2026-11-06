@@ -35,7 +35,7 @@ By pairing **Qwen2.5-Coder-14B-Instruct** with **Compact Invariant Distillation 
 ApexCode v2.0 incorporates **Compact Invariant Distillation (CID)**, synthesizing native mathematical induction, DeepSeek-R1 semantic variable binding (*arXiv:2501.12948*), and bounded cognitive reasoning (*arXiv:2604.10739* "When More Thinking Hurts").
 
 ### Key Innovations:
-- **Bounded Invariant Reasoning ($\le 150$ tokens)**: Restricts `<think> ... </think>` to $\le 2$ dense invariant sentences, permanently eliminating the "preamble trap" (verbose text generation leading to context truncation).
+- **Bounded Invariant Reasoning (under 150 tokens)**: Restricts `<think> ... </think>` reasoning to at most 2 dense invariant sentences, permanently eliminating the "preamble trap" (verbose text generation leading to context truncation).
 - **Zero Contamination Single-Pass Evaluation**: Evaluated strictly blind on the hardest 25 LiveCodeBench failure problems without test-time execution feedback or sample probing.
 - **Breakthrough Score**: Jumped from **32.0% straight to 72.0% (18 / 25 Passed)**!
 - **Zero Swap Churn**: Runs natively in Apple Silicon Unified Memory with **0.00 MB swap churn**.
@@ -143,9 +143,9 @@ Standard generative coding often suffers from two hidden failure modes: sampling
   - Code generation is fundamentally mathematical and discrete. Unlike conversational creative writing, sampling tokens with `temperature > 0.0` introduces variance that leads to hallucinated shortcuts and off-by-one errors.
   - In our benchmark, switching from `temp = 0.2` to greedy `temp = 0.0` resolved algorithmic logic errors on problems like `1873_B` (switching from a flawed non-9 heuristic to a mathematically sound search) and `1899_A` (eliminating inverted modulo branching).
 - **Calibrated Min-P Sampling (`min_p = 0.05`)**:
-  - When candidate diversification is required, Min-P truncates the low-probability tail dynamically based on top-token confidence, preventing syntax degeneration without the rigidity of static top-$k$.
+  - When candidate diversification is required, Min-P truncates the low-probability tail dynamically based on top-token confidence, preventing syntax degeneration without the rigidity of static top-k.
 - **Production Fast I/O Scaffolding**:
-  - Automatically injects high-throughput bulk tokenization (`sys.stdin.read().split()`) to eliminate Time-Limit-Exceeded (TLE) timeouts on large inputs ($N = 10^5$).
+  - Automatically injects high-throughput bulk tokenization (`sys.stdin.read().split()`) to eliminate Time-Limit-Exceeded (TLE) timeouts on large inputs (N = 10^5).
   - Sets deep recursion limits (`sys.setrecursionlimit(300_000)`) for tree traversals and graph algorithms.
   - Enforces `if __name__ == '__main__':` isolation, ensuring LeetCode/class-based evaluators can import `Solution` cleanly without executing top-level I/O.
 
@@ -192,9 +192,9 @@ All code execution verification during benchmarking runs inside an isolated, war
 ### 5. Recursive Multi-Agent Epistemic Swarm (RecursiveMAS & HippoRAG)
 
 To solve complex competitive programming and enterprise refactoring tasks on par with Claude 3.5/3.7 Sonnet:
-- **Smart Decision Override (`scripts/recursive_task_scheduler.py`)**: Computes task complexity $\mathcal{C}(\mathcal{T}) \in [0.0, 1.0]$. Low-entropy tasks ($\mathcal{C} < 0.55$) execute via **System 1 Fast-Path** (<500ms, 0 subagents). High-entropy tasks escalate to **System 2 RecursiveMAS** (DAG decomposition down to depth $N$).
+- **Smart Decision Override (`scripts/recursive_task_scheduler.py`)**: Computes task complexity score in range [0.0, 1.0]. Low-entropy tasks (score < 0.55) execute via **System 1 Fast-Path** (<500ms, 0 subagents). High-entropy tasks escalate to **System 2 RecursiveMAS** (DAG decomposition down to depth N).
 - **CAR Task Engine (`scripts/car_analyzer.py`)**: Distinguishes **Type A surface defects** (single-shot AST repair) from **Type B root-cause missing info** (escalates to RecursiveMAS with an epistemic ticket).
-- **Shared Epistemic Memory Bus (`scripts/epistemic_cache.py`)**: In-memory vector similarity cache ($\ge 0.92$ threshold) eliminates duplicate tool calls. HippoRAG Knowledge Graph extracts multi-hop context via **Personalized PageRank (PPR)**.
+- **Shared Epistemic Memory Bus (`scripts/epistemic_cache.py`)**: In-memory vector similarity cache (>= 0.92 threshold) eliminates duplicate tool calls. HippoRAG Knowledge Graph extracts multi-hop context via **Personalized PageRank (PPR)**.
 - **Zero-Assumption Invariant**: Subagents are strictly bounded to their assigned micro-task and forbidden from guessing unstated specifications, emitting `BLOCKED_MISSING_INFO` tickets.
 - **Empirical LiveCodeBench Verification**: Evaluated on LiveCodeBench (`1873_B: B. Good Kid`) with 100% Pass@1 (13/13 test cases passed in 11.45s, 0.0 MB memory swap).
 
