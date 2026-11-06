@@ -1,0 +1,581 @@
+{
+  "benchmark": "LiveCodeBench (CID Fused Model SLICE 50p)",
+  "model": "/Users/nileshchakraborty/workspace/model-creator/models/qwen2.5_coder_14b_cid_fused",
+  "adapter": "None (Fused Standalone Model)",
+  "problem_count": 50,
+  "overall_pass_at_1": 0.8,
+  "passed_count": 40,
+  "difficulty_breakdown": {
+    "easy": [
+      16,
+      18
+    ],
+    "medium": [
+      18,
+      23
+    ],
+    "hard": [
+      6,
+      9
+    ]
+  },
+  "metrics": {
+    "pass@1": 0.8,
+    "detail": {
+      "pass@1": {
+        "0": 1.0,
+        "1": 0.0,
+        "2": 0.0,
+        "3": 1.0,
+        "4": 0.0,
+        "5": 1.0,
+        "6": 1.0,
+        "7": 1.0,
+        "8": 0.0,
+        "9": 1.0,
+        "10": 0.0,
+        "11": 1.0,
+        "12": 0.0,
+        "13": 1.0,
+        "14": 1.0,
+        "15": 1.0,
+        "16": 1.0,
+        "17": 1.0,
+        "18": 1.0,
+        "19": 1.0,
+        "20": 1.0,
+        "21": 1.0,
+        "22": 1.0,
+        "23": 1.0,
+        "24": 1.0,
+        "25": 0.0,
+        "26": 1.0,
+        "27": 1.0,
+        "28": 1.0,
+        "29": 1.0,
+        "30": 1.0,
+        "31": 1.0,
+        "32": 1.0,
+        "33": 1.0,
+        "34": 1.0,
+        "35": 1.0,
+        "36": 1.0,
+        "37": 1.0,
+        "38": 1.0,
+        "39": 1.0,
+        "40": 1.0,
+        "41": 0.0,
+        "42": 1.0,
+        "43": 1.0,
+        "44": 1.0,
+        "45": 1.0,
+        "46": 1.0,
+        "47": 0.0,
+        "48": 0.0,
+        "49": 1.0
+      }
+    }
+  },
+  "problems": [
+    {
+      "question_id": "1873_A",
+      "question_title": "A. Short Sort",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 5,
+      "total_cases": 5,
+      "latency_sec": 5.633674144744873,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    t = int(input_data[0])\n    results = []\n    for i in range(1, t + 1):\n        cards = input_data[i]\n        if cards == \"abc\" or cards[0] == 'a' or cards[1] == 'b' or cards[2] == 'c':\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n    print('\\n'.join(results))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1873_B",
+      "question_title": "B. Good Kid",
+      "difficulty": "easy",
+      "passed": false,
+      "passed_cases": 4,
+      "total_cases": 5,
+      "latency_sec": 8.864329814910889,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    index = 0\n    t = int(input_data[index]); index += 1\n    results = []\n    for _ in range(t):\n        n = int(input_data[index]); index += 1\n        digits = [int(x) for x in input_data[index:index+n]]; index += n\n        max_product = 1\n        for i in range(n):\n            if digits[i] != 0:\n                gain = (digits[i] + 1) / digits[i]\n                product = 1\n                for j in range(n):\n                    if i != j:\n                        product *= digits[j]\n                    else:\n                        product *= (digits[j] + 1)\n                if product > max_product:\n                    max_product = product\n            else:\n                product = 1\n                for j in range(n):\n                    if i != j:\n                        product *= digits[j]\n                    else:\n                        product *= 1\n                if product > max_product:\n                    max_product = product\n        results.append(int(max_product))\n    print('\\n'.join(map(str, results)))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1873_D",
+      "question_title": "D. 1D Eraser",
+      "difficulty": "easy",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 6.634591817855835,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    index = 0\n    results = []\n    t = int(input_data[index]); index += 1\n    for _ in range(t):\n        n = int(input_data[index]); k = int(input_data[index + 1]); index += 2\n        s = input_data[index]; index += 1\n        count = 0\n        for i in range(n - k + 1):\n            if s[i] == 'B':\n                count += 1\n        results.append(count)\n    print('\\n'.join(map(str, results)))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1883_B",
+      "question_title": "B. Chemistry",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 4,
+      "total_cases": 4,
+      "latency_sec": 8.56749415397644,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    index = 0\n    results = []\n    \n    t = int(input_data[index]); index += 1\n    for _ in range(t):\n        n = int(input_data[index]); k = int(input_data[index + 1]); index += 2\n        s = input_data[index]; index += 1\n        \n        freq = [0] * 26\n        for char in s:\n            freq[ord(char) - ord('a')] += 1\n            \n        odd_count = sum(1 for c in freq if c % 2 != 0)\n        \n        if odd_count - k <= 1:\n            results.append(\"YES\")\n        else:\n            results.append(\"NO\")\n            \n    print('\\n'.join(results))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1883_C",
+      "question_title": "C. Raspberries",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 10.252082109451294,
+      "code": "import sys\n\ndef solve():\n    data = sys.stdin.read().split()\n    idx = 0\n    results = []\n    t = int(data[idx]); idx += 1\n    for _ in range(t):\n        n = int(data[idx]); k = int(data[idx]); idx += 1\n        a = [int(x) for x in data[idx:idx+n]]; idx += n\n        \n        if k == 4:\n            evens = sum(1 for x in a if x % 2 == 0)\n            min_cost = min((4 - (x % 4)) % 4 for x in a)\n            if evens >= 2:\n                min_cost = min(min_cost, max(0, 2 - evens))\n            results.append(min_cost)\n        else:\n            min_cost = min((k - (x % k)) % k for x in a)\n            results.append(min_cost)\n    print('\\n'.join(map(str, results)))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1899_A",
+      "question_title": "A. Game with Integers",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13,
+      "latency_sec": 5.96175217628479,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    t = int(input_data[0])\n    results = []\n    for i in range(1, t + 1):\n        n = int(input_data[i])\n        if n % 3 != 0:\n            results.append(\"First\")\n        else:\n            results.append(\"Second\")\n    print('\\n'.join(results))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1899_B",
+      "question_title": "B. 250 Thousand Tons of TNT",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13,
+      "latency_sec": 10.822669267654419,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    index = 0\n    results = []\n    \n    while index < len(input_data):\n        t = int(input_data[index]); index += 1\n        for _ in range(t):\n            n = int(input_data[index]); index += 1\n            a = [int(x) for x in input_data[index:index+n]]; index += n\n            \n            prefix_sums = [0]\n            for weight in a:\n                prefix_sums.append(prefix_sums[-1] + weight)\n            \n            max_diff = 0\n            for k in range(1, n + 1):\n                if n % k != 0:\n                    continue\n                num_trucks = n // k\n                min_weight = min(prefix_sums[i + k] - prefix_sums[i] for i in range(0, n, k))\n                max_weight = max(prefix_sums[i + k] - prefix_sums[i] for i in range(0, n, k))\n                max_diff = max(max_diff, max_weight - min_weight)\n                \n            results.append(max_diff)\n            \n    print('\\n'.join(map(str, results)))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1899_C",
+      "question_title": "C. Yarik and Array",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 13,
+      "total_cases": 13,
+      "latency_sec": 9.506206274032593,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    idx = 0\n    t = int(input_data[idx]); idx += 1\n    results = []\n    for _ in range(t):\n        n = int(input_data[idx]); idx += 1\n        a = [int(x) for x in input_data[idx:idx+n]]; idx += n\n        \n        if n == 1:\n            results.append(a[0])\n            continue\n            \n        max_sum = a[0]\n        curr_sum = a[0]\n        for i in range(1, n):\n            if (a[i] % 2 != a[i - 1] % 2):\n                curr_sum = max(a[i], a[i] + curr_sum)\n            else:\n                curr_sum = a[i]\n            max_sum = max(max_sum, curr_sum)\n            \n        results.append(max_sum)\n        \n    print('\\n'.join(map(str, results)))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "1899_D",
+      "question_title": "D. Yarik and Musical Notes",
+      "difficulty": "hard",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 9.259448051452637,
+      "code": "import sys\n\ndef solve():\n    input_data = sys.stdin.read().split()\n    index = 0\n    results = []\n    \n    t = int(input_data[index]); index += 1\n    for _ in range(t):\n        n = int(input_data[index]); index += 1\n        a = [int(x) for x in input_data[index:index+n]]; index += n\n        \n        # Calculate the number of pairs (i, j) with i < j\n        pairs = n * (n - 1) // 2\n        results.append(pairs)\n        \n    print('\\n'.join(map(str, results)))\n\nif __name__ == '__main__':\n    solve()"
+    },
+    {
+      "question_id": "2727",
+      "question_title": "number-of-senior-citizens",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 4.4891438484191895,
+      "code": "from typing import List\n\nclass Solution:\n    def countSeniors(self, details: List[str]) -> int:\n        count = 0\n        for detail in details:\n            age = int(detail[11:13])\n            if age > 60:\n                count += 1\n        return count"
+    },
+    {
+      "question_id": "2728",
+      "question_title": "sum-in-a-matrix",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 5.0890278816223145,
+      "code": "import heapq\nfrom typing import List\n\nclass Solution:\n    def matrixSum(self, nums: List[List[int]]) -> int:\n        m, n = len(nums), len(nums[0])\n        for row in nums:\n            heapq.heapify(row)\n            \n        score = 0\n        for _ in range(n):\n            max_vals = [-heapq.heappop(row) for row in nums]\n            score += max(max_vals)\n            \n        return score"
+    },
+    {
+      "question_id": "2730",
+      "question_title": "maximum-or",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.886306047439575,
+      "code": "from typing import List\n\nclass Solution:\n    def maximumOr(self, nums: List[int], k: int) -> int:\n        n = len(nums)\n        prefix = [0] * n\n        suffix = [0] * n\n        \n        for i in range(1, n):\n            prefix[i] = prefix[i - 1] | nums[i - 1]\n            \n        for i in range(n - 2, -1, -1):\n            suffix[i] = suffix[i + 1] | nums[i + 1]\n            \n        max_val = 0\n        for i in range(n):\n            shifted = nums[i] << k\n            result = prefix[i] | shifted | suffix[i]\n            if result > max_val:\n                max_val = result\n                \n        return max_val"
+    },
+    {
+      "question_id": "2754",
+      "question_title": "maximum-strength-of-a-group",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 6.886538982391357,
+      "code": "from typing import List\n\nclass Solution:\n    def maxStrength(self, nums: List[int]) -> int:\n        if len(nums) == 1:\n            return nums[0]\n            \n        positives = [x for x in nums if x > 0]\n        negatives = sorted([x for x in nums if x < 0])\n        \n        # If odd count of negatives, drop the one with smallest absolute value\n        if len(negatives) % 2 != 0:\n            negatives.pop(0)\n            \n        chosen = positives + negatives\n        if not chosen:\n            return max(nums)\n            \n        strength = 1\n        for x in chosen:\n            strength *= x\n            \n        return strength"
+    },
+    {
+      "question_id": "2755",
+      "question_title": "extra-characters-in-a-string",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.308957815170288,
+      "code": "class Solution:\n    def minExtraChar(self, s: str, dictionary: List[str]) -> int:\n        n = len(s)\n        dp = [0] * (n + 1)\n        \n        for i in range(1, n + 1):\n            dp[i] = dp[i - 1] + 1\n            for word in dictionary:\n                if i >= len(word) and s[i - len(word):i] == word:\n                    dp[i] = min(dp[i], dp[i - len(word)])\n                    \n        return dp[n]"
+    },
+    {
+      "question_id": "2756",
+      "question_title": "buy-two-chocolates",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.781522989273071,
+      "code": "from typing import List\n\nclass Solution:\n    def buyChoco(self, prices: List[int], money: int) -> int:\n        if len(prices) < 2:\n            return money\n            \n        min1 = min(prices[0], prices[1])\n        min2 = max(prices[0], prices[1])\n        \n        for i in range(2, len(prices)):\n            if prices[i] < min1:\n                min2 = min1\n                min1 = prices[i]\n            elif prices[i] < min2:\n                min2 = prices[i]\n                \n        if min1 + min2 <= money:\n            return money - (min1 + min2)\n        else:\n            return money"
+    },
+    {
+      "question_id": "2757",
+      "question_title": "count-of-integers",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.365486860275269,
+      "code": "from functools import cache\n\nclass Solution:\n    def count(self, num1: str, num2: str, min_sum: int, max_sum: int) -> int:\n        MOD = 10**9 + 7\n        \n        def count_le(s: str) -> int:\n            @cache\n            def dp(i: int, tight: bool, d_sum: int) -> int:\n                if d_sum > max_sum:\n                    return 0\n                if i == len(s):\n                    return 1 if d_sum >= min_sum else 0\n                limit = int(s[i]) if tight else 9\n                res = 0\n                for d in range(limit + 1):\n                    res = (res + dp(i + 1, tight and (d == limit), d_sum + d)) % MOD\n                return res\n            return dp(0, True, 0)\n            \n        num1_minus_1 = str(int(num1) - 1)\n        ans = (count_le(num2) - count_le(num1_minus_1)) % MOD\n        return ans"
+    },
+    {
+      "question_id": "2777",
+      "question_title": "find-the-distinct-difference-array",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.260785818099976,
+      "code": "from typing import List\n\nclass Solution:\n    def distinctDifferenceArray(self, nums: List[int]) -> List[int]:\n        n = len(nums)\n        prefix = {}\n        suffix = {}\n        \n        for num in nums:\n            suffix[num] = suffix.get(num, 0) + 1\n            \n        diff = []\n        for i in range(n):\n            num = nums[i]\n            prefix[num] = prefix.get(num, 0) + 1\n            suffix[num] -= 1\n            if suffix[num] == 0:\n                del suffix[num]\n                \n            diff.append(len(prefix) - len(suffix))\n            \n        return diff"
+    },
+    {
+      "question_id": "2779",
+      "question_title": "number-of-adjacent-elements-with-the-same-color",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 8.282588958740234,
+      "code": "from typing import List\n\nclass Solution:\n    def colorTheArray(self, n: int, queries: List[List[int]]) -> List[int]:\n        nums = [0] * n\n        answer = []\n        adjacent_count = 0\n        \n        for index, color in queries:\n            if nums[index] != 0:\n                if index > 0 and nums[index] == nums[index - 1]:\n                    adjacent_count -= 1\n                if index < n - 1 and nums[index] == nums[index + 1]:\n                    adjacent_count -= 1\n                    \n            nums[index] = color\n            \n            if index > 0 and nums[index] == nums[index - 1]:\n                adjacent_count += 1\n            if index < n - 1 and nums[index] == nums[index + 1]:\n                adjacent_count += 1\n                \n            answer.append(adjacent_count)\n            \n        return answer"
+    },
+    {
+      "question_id": "2784",
+      "question_title": "power-of-heroes",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.361628293991089,
+      "code": "from typing import List\n\nclass Solution:\n    def sumOfPower(self, nums: List[int]) -> int:\n        MOD = 10**9 + 7\n        nums.sort()\n        total = 0\n        prefix_sum = 0\n        for i in range(len(nums)):\n            total = (total + nums[i] ** 2 * (prefix_sum + nums[i]) % MOD) % MOD\n            prefix_sum = (prefix_sum * 2 + nums[i]) % MOD\n        return total"
+    },
+    {
+      "question_id": "2785",
+      "question_title": "semi-ordered-permutation",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 7.101785898208618,
+      "code": "from typing import List\n\nclass Solution:\n    def semiOrderedPermutation(self, nums: List[int]) -> int:\n        n = len(nums)\n        idx1 = nums.index(1)\n        idxn = nums.index(n)\n        \n        # Calculate the minimum swaps needed\n        swaps = idx1 + (n - 1 - idxn)\n        \n        # If 1 is after n, we have counted one swap too many\n        if idx1 > idxn:\n            swaps -= 1\n            \n        return swaps"
+    },
+    {
+      "question_id": "2786",
+      "question_title": "find-the-longest-semi-repetitive-substring",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 7.1861138343811035,
+      "code": "class Solution:\n    def longestSemiRepetitiveSubstring(self, s: str) -> int:\n        n = len(s)\n        if n < 2:\n            return n\n            \n        left = 0\n        max_length = 1\n        consecutive_count = 0\n        \n        for right in range(1, n):\n            if s[right] == s[right - 1]:\n                consecutive_count += 1\n                \n            while consecutive_count > 1:\n                if s[left] == s[left + 1]:\n                    consecutive_count -= 1\n                left += 1\n                \n            max_length = max(max_length, right - left + 1)\n            \n        return max_length"
+    },
+    {
+      "question_id": "2791",
+      "question_title": "find-the-losers-of-the-circular-game",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.273079872131348,
+      "code": "class Solution:\n    def circularGameLosers(self, n: int, k: int) -> List[int]:\n        seen = {0}\n        current = 0\n        i = 1\n        while True:\n            current = (current + i * k) % n\n            if current in seen:\n                break\n            seen.add(current)\n            i += 1\n            \n        return [i + 1 for i in range(n) if i not in seen]"
+    },
+    {
+      "question_id": "2792",
+      "question_title": "neighboring-bitwise-xor",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 5.407355785369873,
+      "code": "from typing import List\n\nclass Solution:\n    def doesValidArrayExist(self, derived: List[int]) -> bool:\n        xor_sum = 0\n        for x in derived:\n            xor_sum ^= x\n        return xor_sum == 0"
+    },
+    {
+      "question_id": "2800",
+      "question_title": "minimum-string-length-after-removing-substrings",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.329246997833252,
+      "code": "class Solution:\n    def minLength(self, s: str) -> int:\n        stack = []\n        for char in s:\n            if stack and ((char == 'B' and stack[-1] == 'A') or (char == 'D' and stack[-1] == 'C')):\n                stack.pop()\n            else:\n                stack.append(char)\n        return len(stack)"
+    },
+    {
+      "question_id": "2802",
+      "question_title": "find-the-punishment-number-of-an-integer",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 8.61945915222168,
+      "code": "class Solution:\n    def punishmentNumber(self, n: int) -> int:\n        def can_partition(s: str, target: int) -> bool:\n            if not s:\n                return target == 0\n            for i in range(1, len(s) + 1):\n                prefix = int(s[:i])\n                if prefix > target:\n                    break\n                if can_partition(s[i:], target - prefix):\n                    return True\n            return False\n        \n        total = 0\n        for i in range(1, n + 1):\n            square = i * i\n            if can_partition(str(square), i):\n                total += square\n        return total"
+    },
+    {
+      "question_id": "2808",
+      "question_title": "painting-the-walls",
+      "difficulty": "hard",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 8.267349004745483,
+      "code": "from typing import List\n\nclass Solution:\n    def paintWalls(self, cost: List[int], time: List[int]) -> int:\n        n = len(cost)\n        dp = [float('inf')] * (n + 1)\n        dp[0] = 0\n        \n        for i in range(1, n + 1):\n            for j in range(n):\n                if time[j] + 1 <= i:\n                    dp[i] = min(dp[i], dp[i - time[j] - 1] + cost[j])\n                else:\n                    dp[i] = min(dp[i], dp[i - 1])\n                    \n        return dp[n]"
+    },
+    {
+      "question_id": "2810",
+      "question_title": "collecting-chocolates",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.71121621131897,
+      "code": "from typing import List\n\nclass Solution:\n    def minCost(self, nums: List[int], x: int) -> int:\n        n = len(nums)\n        min_costs = list(nums)  # Initialize min_costs with the first element of each type\n        total_min_cost = sum(min_costs)\n        \n        for k in range(1, n):\n            for i in range(n):\n                min_costs[i] = min(min_costs[i], nums[(i - k) % n])\n            total_min_cost = min(total_min_cost, sum(min_costs) + k * x)\n            \n        return total_min_cost"
+    },
+    {
+      "question_id": "2811",
+      "question_title": "determine-the-minimum-sum-of-a-k-avoiding-array",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 7.142848968505859,
+      "code": "class Solution:\n    def minimumSum(self, n: int, k: int) -> int:\n        seen = set()\n        total = 0\n        curr = 1\n        while len(seen) < n:\n            if (k - curr) not in seen:\n                seen.add(curr)\n                total += curr\n            curr += 1\n        return total"
+    },
+    {
+      "question_id": "2812",
+      "question_title": "find-the-maximum-achievable-number",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 4.631527900695801,
+      "code": "class Solution:\n    def theMaximumAchievableX(self, num: int, t: int) -> int:\n        return num + 2 * t"
+    },
+    {
+      "question_id": "2816",
+      "question_title": "lexicographically-smallest-palindrome",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 7.612989902496338,
+      "code": "class Solution:\n    def makeSmallestPalindrome(self, s: str) -> str:\n        chars = list(s)\n        n = len(chars)\n        for i in range(n // 2):\n            chars[i] = chars[n - i - 1] = min(chars[i], chars[n - i - 1])\n        return \"\".join(chars)"
+    },
+    {
+      "question_id": "2817",
+      "question_title": "minimum-cost-to-make-all-characters-equal",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.591663837432861,
+      "code": "class Solution:\n    def minimumCost(self, s: str) -> int:\n        n = len(s)\n        total_cost = 0\n        for i in range(n - 1):\n            if s[i] != s[i + 1]:\n                total_cost += min(i + 1, n - 1 - i)\n        return total_cost"
+    },
+    {
+      "question_id": "2819",
+      "question_title": "remove-trailing-zeros-from-a-string",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 5.520385026931763,
+      "code": "class Solution:\n    def removeTrailingZeros(self, num: str) -> str:\n        if not num:\n            return \"\"\n        i = len(num) - 1\n        while i >= 0 and num[i] == '0':\n            i -= 1\n        return num[:i + 1]"
+    },
+    {
+      "question_id": "2824",
+      "question_title": "check-if-the-number-is-fascinating",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.6451568603515625,
+      "code": "class Solution:\n    def isFascinating(self, n: int) -> bool:\n        s = str(n) + str(2 * n) + str(3 * n)\n        return len(s) == 9 and set(s) == set('123456789')"
+    },
+    {
+      "question_id": "2825",
+      "question_title": "minimize-string-length",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 5.068757057189941,
+      "code": "class Solution:\n    def minimizedStringLength(self, s: str) -> int:\n        return len(set(s))"
+    },
+    {
+      "question_id": "2827",
+      "question_title": "greatest-common-divisor-traversal",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 83,
+      "total_cases": 83,
+      "latency_sec": 17.70351481437683,
+      "code": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def canTraverseAllPairs(self, nums: List[int]) -> bool:\n        n = len(nums)\n        if n == 1:\n            return True\n        if 1 in nums:\n            return False\n            \n        parent = list(range(n))\n        size = [1] * n\n        \n        def find(x):\n            if parent[x] != x:\n                parent[x] = find(parent[x])\n            return parent[x]\n            \n        def union(x, y):\n            rx, ry = find(x), find(y)\n            if rx != ry:\n                if size[rx] < size[ry]:\n                    rx, ry = ry, rx\n                parent[ry] = rx\n                size[rx] += size[ry]\n\n        prime_to_first_idx = {}\n        for i, val in enumerate(nums):\n            temp = val\n            d = 2\n            while d * d <= temp:\n                if temp % d == 0:\n                    while temp % d == 0:\n                        temp //= d\n                    if d in prime_to_first_idx:\n                        union(i, prime_to_first_idx[d])\n                    else:\n                        prime_to_first_idx[d] = i\n                d += 1\n            if temp > 1:\n                if temp in prime_to_first_idx:\n                    union(i, prime_to_first_idx[temp])\n                else:\n                    prime_to_first_idx[temp] = i\n                    \n        root = find(0)\n        return size[root] == n"
+    },
+    {
+      "question_id": "2828",
+      "question_title": "lexicographically-smallest-string-after-substring-operation",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 8.737652063369751,
+      "code": "class Solution:\n    def smallestString(self, s: str) -> str:\n        chars = list(s)\n        n = len(chars)\n        \n        i = 0\n        while i < n and chars[i] == 'a':\n            i += 1\n            \n        if i == n:\n            chars[-1] = 'z'\n            return \"\".join(chars)\n            \n        while i < n and chars[i] != 'a':\n            chars[i] = chr(ord(chars[i]) - 1)\n            i += 1\n            \n        return \"\".join(chars)"
+    },
+    {
+      "question_id": "2831",
+      "question_title": "number-of-beautiful-pairs",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.352641105651855,
+      "code": "from typing import List\nfrom math import gcd\n\nclass Solution:\n    def countBeautifulPairs(self, nums: List[int]) -> int:\n        n = len(nums)\n        count = 0\n        for i in range(n):\n            for j in range(i + 1, n):\n                first_digit = int(str(nums[i])[0])\n                last_digit = int(str(nums[j])[-1])\n                if gcd(first_digit, last_digit) == 1:\n                    count += 1\n        return count"
+    },
+    {
+      "question_id": "2832",
+      "question_title": "find-the-longest-equal-subarray",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 8.607977867126465,
+      "code": "from collections import defaultdict\nfrom typing import List\n\nclass Solution:\n    def longestEqualSubarray(self, nums: List[int], k: int) -> int:\n        index_map = defaultdict(list)\n        for i, num in enumerate(nums):\n            index_map[num].append(i)\n            \n        max_length = 0\n        for indices in index_map.values():\n            left = 0\n            for right in range(len(indices)):\n                while indices[right] - indices[left] + 1 - (right - left + 1) > k:\n                    left += 1\n                max_length = max(max_length, right - left + 1)\n                \n        return max_length"
+    },
+    {
+      "question_id": "2833",
+      "question_title": "count-zero-request-servers",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 12.286565780639648,
+      "code": "from typing import List\nfrom collections import defaultdict\n\nclass Solution:\n    def countServers(self, n: int, logs: List[List[int]], x: int, queries: List[int]) -> List[int]:\n        logs.sort(key=lambda a: a[1])\n        q_sorted = sorted([(q, idx) for idx, q in enumerate(queries)], key=lambda a: a[0])\n        \n        res = [0] * len(queries)\n        active_count = defaultdict(int)\n        left = 0\n        right = 0\n        m = len(logs)\n        \n        for q, orig_idx in q_sorted:\n            while right < m and logs[right][1] <= q:\n                active_count[logs[right][0]] += 1\n                right += 1\n                \n            while left < m and logs[left][1] < q - x:\n                active_count[logs[left][0]] -= 1\n                if active_count[logs[left][0]] == 0:\n                    del active_count[logs[left][0]]\n                left += 1\n                \n            res[orig_idx] = n - len(active_count)\n            \n        return res"
+    },
+    {
+      "question_id": "2834",
+      "question_title": "relocate-marbles",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.82888388633728,
+      "code": "from typing import List\n\nclass Solution:\n    def relocateMarbles(self, nums: List[int], moveFrom: List[int], moveTo: List[int]) -> List[int]:\n        positions = set(nums)\n        for i in range(len(moveFrom)):\n            positions.remove(moveFrom[i])\n            positions.add(moveTo[i])\n        return sorted(positions)"
+    },
+    {
+      "question_id": "2837",
+      "question_title": "minimum-operations-to-make-the-integer-zero",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.313890695571899,
+      "code": "class Solution:\n    def makeTheIntegerZero(self, num1: int, num2: int) -> int:\n        for k in range(1, 61):\n            reduced = num1 - k * num2\n            if reduced >= 0 and reduced.bit_count() <= k <= reduced:\n                return k\n        return -1"
+    },
+    {
+      "question_id": "2839",
+      "question_title": "maximum-sum-queries",
+      "difficulty": "hard",
+      "passed": false,
+      "passed_cases": 6,
+      "total_cases": 7,
+      "latency_sec": 13.894720792770386,
+      "code": "from typing import List\nfrom collections import deque\n\nclass Solution:\n    def maximumSumQueries(self, nums1: List[int], nums2: List[int], queries: List[List[int]]) -> List[int]:\n        n = len(nums1)\n        pairs = sorted([(nums1[i], nums2[i]) for i in range(n)], reverse=True)\n        q_sorted = sorted([(q[0], q[1], i) for i, q in enumerate(queries)], reverse=True)\n        \n        ans = [-1] * len(queries)\n        stack = deque()\n        p_idx = 0\n        \n        for x_req, y_req, q_orig in q_sorted:\n            while p_idx < n and pairs[p_idx][0] >= x_req:\n                x_val, y_val = pairs[p_idx]\n                p_idx += 1\n                while stack and stack[0][1] <= x_val + y_val:\n                    stack.popleft()\n                if not stack or stack[0][0] < y_val:\n                    stack.appendleft((y_val, x_val + y_val))\n                    \n            while stack and stack[0][0] < y_req:\n                stack.popleft()\n                \n            if stack:\n                ans[q_orig] = stack[0][1]\n                \n        return ans"
+    },
+    {
+      "question_id": "2844",
+      "question_title": "sum-of-squares-of-special-elements",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 6.408480882644653,
+      "code": "from typing import List\n\nclass Solution:\n    def sumOfSquares(self, nums: List[int]) -> int:\n        n = len(nums)\n        total = 0\n        for i in range(1, n + 1):\n            if n % i == 0:\n                total += nums[i - 1] ** 2\n        return total"
+    },
+    {
+      "question_id": "2845",
+      "question_title": "find-the-value-of-the-partition",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 5.21042013168335,
+      "code": "from typing import List\n\nclass Solution:\n    def findValueOfPartition(self, nums: List[int]) -> int:\n        nums.sort()\n        min_value = float('inf')\n        for i in range(len(nums) - 1):\n            min_value = min(min_value, nums[i + 1] - nums[i])\n        return min_value"
+    },
+    {
+      "question_id": "2847",
+      "question_title": "find-maximum-number-of-string-pairs",
+      "difficulty": "easy",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 6.952237844467163,
+      "code": "class Solution:\n    def maximumNumberOfStringPairs(self, words: List[str]) -> int:\n        n = len(words)\n        count = 0\n        for i in range(n):\n            for j in range(i + 1, n):\n                if words[i] == words[j][::-1]:\n                    count += 1\n        return count"
+    },
+    {
+      "question_id": "2848",
+      "question_title": "special-permutations",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 10.596889972686768,
+      "code": "from typing import List\n\nclass Solution:\n    def specialPerm(self, nums: List[int]) -> int:\n        n = len(nums)\n        MOD = 10**9 + 7\n        \n        # dp[mask][i] will store the number of valid permutations of the selected elements (encoded in mask) ending with element i\n        dp = [[0] * n for _ in range(1 << n)]\n        \n        for i in range(n):\n            dp[1 << i][i] = 1\n            \n        for mask in range(1 << n):\n            for i in range(n):\n                if mask & (1 << i):\n                    for j in range(n):\n                        if mask & (1 << j) and (nums[i] % nums[j] == 0 or nums[j] % nums[i] == 0):\n                            dp[mask][i] = (dp[mask][i] + dp[mask ^ (1 << i)][j]) % MOD\n                    \n        total = sum(dp[(1 << n) - 1]) % MOD\n        return total"
+    },
+    {
+      "question_id": "2849",
+      "question_title": "sum-of-imbalance-numbers-of-all-subarrays",
+      "difficulty": "hard",
+      "passed": true,
+      "passed_cases": 14,
+      "total_cases": 14,
+      "latency_sec": 9.508618831634521,
+      "code": "from typing import List\n\nclass Solution:\n    def sumImbalanceNumbers(self, nums: List[int]) -> int:\n        n = len(nums)\n        total = 0\n        for i in range(n):\n            seen = {nums[i]}\n            current = 0\n            for j in range(i + 1, n):\n                if nums[j] not in seen:\n                    seen.add(nums[j])\n                    has_prev = (nums[j] - 1) in seen\n                    has_next = (nums[j] + 1) in seen\n                    if not has_prev and not has_next:\n                        current += 1\n                    elif has_prev and has_next:\n                        current -= 1\n                total += current\n        return total"
+    },
+    {
+      "question_id": "2850",
+      "question_title": "construct-the-longest-new-string",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 6.889714956283569,
+      "code": "class Solution:\n    def longestString(self, x: int, y: int, z: int) -> int:\n        # Use the minimum of x and y to alternate AA and BB\n        min_xy = min(x, y)\n        # If x != y, we can use one extra string of the type that has more available\n        if x != y:\n            min_xy += 1\n        # Each AA or BB pair contributes 2 to the length, and each AB contributes 2\n        return 2 * (min_xy * 2 + z)"
+    },
+    {
+      "question_id": "2854",
+      "question_title": "decremental-string-concatenation",
+      "difficulty": "medium",
+      "passed": false,
+      "passed_cases": 0,
+      "total_cases": 1,
+      "latency_sec": 20.53729796409607,
+      "code": "from typing import List\n\nclass Solution:\n    def minimizeConcatenatedLength(self, words: List[str]) -> int:\n        n = len(words)\n        if n == 1:\n            return len(words[0])\n            \n        # Initialize DP table\n        dp = [[[float('inf')] * 26 for _ in range(26)] for _ in range(n)]\n        first_char = ord(words[0][0]) - ord('a')\n        last_char = ord(words[0][-1]) - ord('a')\n        dp[0][first_char][last_char] = len(words[0])\n        \n        for i in range(1, n):\n            curr_first = ord(words[i][0]) - ord('a')\n            curr_last = ord(words[i][-1]) - ord('a')\n            prev_first = ord(words[i - 1][0]) - ord('a')\n            prev_last = ord(words[i - 1][-1]) - ord('a')\n            \n            for f in range(26):\n                for l in range(26):\n                    if dp[i - 1][f][l] < float('inf'):\n                        # Prepend words[i]\n                        if l == curr_first:\n                            dp[i][curr_last][l] = min(dp[i][curr_last][l], dp[i - 1][f][l] + len(words[i]) - 1)\n                        else:\n                            dp[i][curr_last][l] = min(dp[i][curr_last][l], dp[i - 1][f][l] + len(words[i]))\n                        \n                        # Append words[i]\n                        if f == curr_last:\n                            dp[i][f][curr_first] = min(dp[i][f][curr_first], dp[i - 1][f][l] + len(words[i]) - 1)\n                        else:\n                            dp[i][f][curr_first] = min(dp[i][f][curr_first], dp[i - 1][f][l] + len(words[i]))\n                            \n        min_length = float('inf')\n        for f in range(26):\n            for l in range(26):\n                min_length = min(min_length, dp[n - 1][f][l])\n                \n        return min_length"
+    },
+    {
+      "question_id": "2855",
+      "question_title": "maximum-number-of-jumps-to-reach-the-last-index",
+      "difficulty": "medium",
+      "passed": true,
+      "passed_cases": 15,
+      "total_cases": 15,
+      "latency_sec": 8.620195150375366,
+      "code": "from typing import List\n\nclass Solution:\n    def maximumJumps(self, nums: List[int], target: int) -> int:\n        n = len(nums)\n        dp = [-1] * n\n        dp[0] = 0\n        \n        for i in range(n):\n            if dp[i] == -1:\n                continue\n            for j in range(i + 1, n):\n                if -target <= nums[j] - nums[i] <= target:\n                    dp[j] = max(dp[j], dp[i] + 1)\n                    \n        return dp[-1]"
+    }
+  ]
+}

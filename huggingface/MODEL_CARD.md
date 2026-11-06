@@ -99,12 +99,12 @@ bash scripts/serve_fused_cid_model.sh 8080
 
 Evaluated against the official [LiveCodeBench](https://livecodebench.github.io/) evaluation suite on the **exact same 50 consecutive problems** under strict zero-shot conditions (pure problem text, **0 sample test runs during inference**, no execution repair loops):
 
-| Difficulty Slice | Standard Zero-Shot Baseline | Unified Research Pipeline | Adaptive Routing & Tool-Call Linter Repair | Relative Improvement |
+| Difficulty Slice | Standard Zero-Shot Baseline | Unified Research Pipeline | Adaptive Routing & Linter Repair | CID Fused Standalone (Single Pass) |
 | :--- | :---: | :---: | :---: | :---: |
-| **EASY** | 61.1% (11 / 18) | 77.8% (14 / 18) | **88.9% (16 / 18)** | **+45.5%** |
-| **MEDIUM** | 39.1% (9 / 23) | 60.9% (14 / 23) | **73.9% (17 / 23)** | **+89.0%** |
-| **HARD** | 33.3% (3 / 9) | 33.3% (3 / 9) | **66.7% (6 / 9)** | **+100.3%** |
-| **OVERALL PASS@1** | **46.0% (23 / 50)** | **62.0% (31 / 50)** | **78.0% (39 / 50)** | **+69.6%** |
+| **EASY** | 61.1% (11 / 18) | 77.8% (14 / 18) | 88.9% (16 / 18) | **88.9% (16 / 18)** |
+| **MEDIUM** | 39.1% (9 / 23) | 60.9% (14 / 23) | 73.9% (17 / 23) | **78.3% (18 / 23)** |
+| **HARD** | 33.3% (3 / 9) | 33.3% (3 / 9) | 66.7% (6 / 9) | **66.7% (6 / 9)** |
+| **OVERALL PASS@1** | **46.0% (23 / 50)** | **62.0% (31 / 50)** | **78.0% (39 / 50)** | **80.0% (40 / 50)** |
 
 *All runs executed unassisted on Apple Silicon Metal GPU; 100% valid AST syntax; 0.0 MB SSD swap churn.*
 

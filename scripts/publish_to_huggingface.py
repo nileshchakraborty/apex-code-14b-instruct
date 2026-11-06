@@ -102,6 +102,17 @@ def publish(
             commit_message="docs: add 72.0% Pass@1 verified Compact Invariant Distillation (CID v2) LiveCodeBench scorecard",
         )
 
+    cid_50p_path = "./tests/lcb_benchmark_cid_50p.json"
+    if os.path.isfile(cid_50p_path):
+        print("📊 Uploading Verified CID Fused 50-Problem LiveCodeBench (80.0% Pass@1) Results...")
+        api.upload_file(
+            path_or_fileobj=cid_50p_path,
+            path_in_repo="lcb_benchmark_cid_50p.json",
+            repo_id=repo_id,
+            repo_type="model",
+            commit_message="docs: add 80.0% Pass@1 verified CID Fused standalone 50-problem LiveCodeBench results",
+        )
+
     release_notes_path = "./RELEASE_NOTES_v2.0.0.md"
     if os.path.isfile(release_notes_path):
         print("📄 Uploading Release Notes v2.0.0...")
